@@ -2,7 +2,9 @@
 typora-root-url: ./
 ---
 
-​                                                                 **面试**
+​                                                                 **java总结**
+
+java相关的博客：<https://blog.kuangstudy.com/>
 
  **1. java的跨平台原理**
 
@@ -230,6 +232,10 @@ pageContext，request，session，application
 
 request域（每次HTTP请求回创建一个新的bean）  session域（在一个会话中共享一个bean）
 
+**springmvc流程：** 
+
+![icon](/assert/14.png)
+
 **37.如何解决中文乱码问题？**
 
 ​	post请求中在charetfilter中设置encoding值，我满五年可以在web.xml中设置初始化参数
@@ -267,6 +273,8 @@ request域（每次HTTP请求回创建一个新的bean）  session域（在一�
 ​	1.service network status 查看网络状态
 
 ​	2.chkconfig --list列取服务 用来设置自启动 
+
+​	3.查看进程  ps -ef | grep mysql
 
 **40.Redis持久化**
 	rdb 节省空间，恢复快，fork一个子进程数据量大也很慢，满足条件才存储，
@@ -555,7 +563,7 @@ spring整合shiro
 
 ​	spring提供一个简单的过滤器的处理方案，他将集体的操作交给内部filter对象delegate去处理，而这个delegate通过spring的IOC容器获取，这里采用spring的factorybean获取，虽然支配了一个filter，但是他并没有做实际的工作，而是交给spring容器中的为bean的名字的shirofilter类，即shirofactorybean，shiro过滤器工厂bean相当于间接地加载了9个内置过滤器
 
-![58303311286](/../../../ADMINI~1/AppData/Local/Temp/1583033112867.png)
+![icon](/assert/1583033112867.png)
 
 登录认证流程：1.创建令牌（对用户名和密码进行封装）  2.获取subject（主题应用程序与shiro交互的入口部分）    3.执行认证
 
@@ -915,3 +923,727 @@ axios:    axios.get().then(res=>{console.log(res.data(自动包装data属性))})
 定义全局组件：vue.component("组件名"，{template:}),可以在任何地方使用。
 
 定义局部组件：components:{组件名:{tempalte:}}   在谁的内部定义谁能使用。
+
+5.组件编写方式与vue实例的区别？
+
+​	自定义组件需要有一个root element ；父组件的data是无法共享的；组件可以有data，methods，computed...但是data必须是一个函数
+
+![icon](/assert/3.png)
+
+6.父组件传子组件（属性向下传）
+
+​	props:["父组件中传递过来的属性名"]   接收父组件传来的属性
+
+![icon](/assert/4.png)
+
+动态的绑定属性  在属性前面加":"来实现动态绑定，否则会把属性当成普通字符串来对待
+
+属性验证![icon](/assert/5.png) 如果值是动态的加冒号来动态绑定
+
+7.子传父组件间的通讯
+
+​	在子组件中使用$emit()来触发父组件中的回调函数，即触发父组件中的方法执行
+
+![icon](/assert/6.png)
+
+$event用来接收参数
+
+8.ref的使用
+
+​	ref放在标签上拿到的是原生节点；  ref放到组件上拿到的是组件对象
+
+
+
+![icon](/assert/7.png)
+
+9.组件通信
+
+![icon](/assert/8.png)
+
+10.动态组件
+
+<component> 元素，vue内置的组件动态的绑定多个组件到它的is属性 <keep-alive> 保留状态，避免重新渲染
+
+![icon](/assert/10.png)
+
+11.slot插槽（内容分发）具名插槽：具有名字的插槽，更精细的控制插入内容
+
+![icon](/assert/11.png)
+
+![icon](/assert/12.png)
+
+使用插槽将父组件的内容混到了子组件中
+
+![icon](/assert/13.png)
+
+12.vue-router
+
+​	a.创建`components目录下存放我们自己编写的组件
+
+​	b.定义一个Content.vue 的组件
+
+```html
+<template>
+  <div>
+ <h1>内容页</h1>
+  </div>
+</template>
+
+<script>
+ export default {
+     name: "Content"
+ }
+</script>
+```
+
+​	c. 安装路由,在src目录下,新建一个文件夹 : router,专门存放路由
+
+```html
+import Vue from 'vue'
+// 导入路由插件
+import Router from 'vue-router'
+// 导入上面定义的组件
+import Content from '../components/Content'
+import main from '../components/main'
+// 安装路由
+Vue.use(Router);
+// 配置路由
+export default new Router({
+  routes: [
+    {
+      // 路由路径
+      path: '/content',
+      // 路由名称
+      name: 'Content',
+      // 跳转到组件
+      component: Content
+    }, {
+      // 路由路径
+      path: '/main',
+      // 路由名称
+      name: 'main',
+      // 跳转到组件
+      component: main
+    }
+  ]
+});
+```
+
+d.在`main.js` 中配置路由
+
+```html
+import Vue from 'vue'
+import App from './App'
+
+// 导入上面创建的路由配置目录
+import router from './router'
+
+//来关闭生产模式下给出的提示
+Vue.config.productionTip = false;
+
+new Vue({
+  el: '#app',
+  // 配置路由
+  router,
+  components: { App },
+  template: '<App/>'
+});
+```
+
+e.在`App.vue`中使用路由
+
+```html
+<template>
+  <div id="app">
+    <!--
+      router-link： 默认会被渲染成一个 <a> 标签，to 属性为指定链接
+      router-view： 用于渲染路由匹配到的组件
+    -->
+    <router-link to="/">首页</router-link>
+    <router-link to="/content">内容</router-link>
+    <router-view></router-view>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'App'
+}
+</script>
+
+<style>
+  #app {
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #2c3e50;
+    margin-top: 60px;
+  }
+</style>
+```
+
+13.参数传递及接收
+
+​	a.前端传参数
+
+![icon](/assert/15.png)
+
+​	b.路由中接收
+
+![icon](/assert/16.png)
+
+​	c.组件中展示(展示时要用标签包裹)
+
+![icon](/assert/17.png)
+
+方式2：通过pops解耦
+
+​	a.前端传参数不用改变
+
+​	b.路由中接收(允许使用pops接收)
+
+![icon](/assert/18.png)
+
+​	c.组件中展示
+
+![icon](/assert/19.png)
+
+重定向：![icon](/assert/20.png)
+
+写完组件后要先把它配到路由中 import 组件名 from ' ' 在配置路由
+
+14，钩子函数
+
+![icon](/assert/21.png)
+
+- to：路由将要跳转的路径信息
+- from：路径跳转前的路径信息
+- next：路由的控制参数 
+
+15.js相关（可参考`<https://www.cnblogs.com/weigaojie/p/10491085.html>`）
+
+`let ` ： let命令，用来声明变量。它的用法类似于var，但是所声明的变量，只在`let命令所在的代码块`内有效  适用于for循环;先声明，在使用;不允许在相同作用域内重复声明同一个变量;let可以识别块级作用域
+
+`const`:声明一个只读的常量。一旦声明，常量的值就不能改变。
+
+声明常量的同时进行赋值，不赋值就会报错
+
+可以识别块级作用域
+
+不能重复声明
+
+不存在变量提升【先访问在声明】
+
+`数据类型`：根据在内存中的存储位置划分。基本数据类型存放在栈中，引用数据类型存放在堆中（指针存放在栈中，内容存放在堆中 ）
+
+`基本数据类型`：undefined；null 【空占位符】；string 【也是对象】
+
+`string中对象的方法`：
+
+​	let 对象=new String（“  ”）；
+
+​	对象.charCodeAt(2)  返回第2个位置的字符编码
+
+​	查找元素    对象.charAt(0) 字符串的第0个位置的元素【查找字符】
+
+​	查找下标     对象.indexOf（“ ”）   查找对应字符的下标，如果有返回下标，如果没有，返  回-1【第一 个字符开始的下标】
+
+​	对象.lastIndexOf（“”） 倒着看查找，倒序看如果有返回下标，如果没有，返回-1【第一个字符开始的下标】
+
+​	对象.lastIndexOf（“”） 倒着看查找，倒序看如果有返回下标，如果没有，返回-1【第一个字符开始的下标】
+
+​	对象.match（“”）  有的话，返回数组【返回值，下标，包含返回值的数组】没有  返回null
+
+​	字符串的截取：【返回新值，不改变原内容】
+
+​	对象.substr（开始下标，【截取的长度】）
+
+​	对象.substring（开始下标，结束的下标），从开始下标开始到结束下标之前，不取到结束的下标
+
+​	对象.slice（开始下标，结束的下标），从开始下标开始到结束下标之前，不取到结束的下标【数组的方法】
+
+​	字符串大小写【转换】let str="AbCdEf";str.toLowerCase() 
+
+​	转换为小写str.toUpperCase() 转换为大写
+
+​	替换：str.replace（“山”，“闪”）；
+
+​	转换【字符串转换数组】let str=“1,2,3,4,5,6”；arr2=str.split（“，”）；
+
+`引用数据类型`
+
+​	object（属性与方法的集合）数组，函数，对象
+
+​	深拷贝：let arr=【1,2,3,4】
+
+​			let  arr1；
+
+​			arr1=arr； ：传址
+
+​			arr1 和 arr具有相同地址
+
+​	浅拷贝：let arr=【1,2,3,4】；
+
+​			let arr1=【】；
+
+​			arr.foreach(function（value）{    arr1.push（value）})
+
+​	三元运算符：表达式 ? 为真的执行语句：为假的执行语句
+
+ajax请求：
+
+​	ajax({                              
+
+​		  url:'/',    必须有    
+
+​		type:'get',    可有可无    
+
+​		dataType:'text',     可有可无   
+
+​		 data:{name:"zhangsan"},     可有可无   
+
+​		 success:function(data){         可有可无       
+
+​	         upDate(data)            },})
+
+![icon](/assert/22.png)
+
+
+
+**56.vue的优缺点**
+
+a.优点：
+
+双向数据绑定  
+
+ 	通过MVVM思想实现数据的双向绑定，让开发者不用再操作dom对象，有更多的时间去思考业务逻辑。
+
+组件化开发
+
+​	我们可以像编程一样把模块封装 这就引入了组件化开发的思想。
+
+虚拟dom
+
+​	这个DOM操作属于预处理操作，并没有真实的操作DOM，所以叫做虚拟DOM。最后在计算完毕才真正将DOM操作提交，将DOM操作变化反映到DOM树上。
+
+**57.spring面试相关**
+
+**1.什么是spring？**
+
+​	 Spring 框架指的都是 Spring Framework，它是很多模块的集合，这些模块是：核心容器、数据访问/集成,、Web、AOP（面向切面编程）、工具、消息和测试模块。比如：Core Container 中的 Core 组件是Spring 所有组件的核心，Beans 组件和 Context 组件是实现IOC和依赖注入的基础，AOP组件用来实现面向切面编程。
+
+**2.列举一些重要的spring模块？**
+
+![icon](/assert/23.png)
+
+Spring Core： 基础,可以说 Spring 其他所有的功能都需要依赖于该类库。主要提供 IOC 依赖注入功能。
+Spring Aspects： 该模块为与AspectJ的集成提供支持。
+Spring AOP ：提供了面向方面的编程实现。
+Spring JDBC : Java数据库连接。
+Spring JMS ：Java消息服务。
+Spring ORM : 用于支持Hibernate等ORM工具。
+Spring Web : 为创建Web应用程序提供支持。
+Spring Test : 提供了对 JUnit 和 TestNG 测试的支持。
+
+**3.谈谈自己对于springIOC和AOP的理解？**
+
+​	IoC（Inverse of Control:控制反转）是一种设计思想，就是 将原本在程序中手动创建对象的控制权，交由Spring框架来管理。 IoC 在其他语言中也有应用，并非 Spirng 特有。 IoC 容器是 Spring 用来实现 IoC 的载体， IoC 容器实际上就是个Map（key，value）,Map 中存放的是各种对象。
+
+将对象之间的相互依赖关系交给 IOC 容器来管理，并由 IOC 容器完成对象的注入。这样可以很大程度上简化应用的开发，把应用从复杂的依赖关系中解放出来。 IOC 容器就像是一个工厂一样，当我们需要创建一个对象的时候，只需要配置好配置文件/注解即可，完全不用考虑对象是如何被创建出来的。 在实际项目中一个 Service 类可能有几百甚至上千个类作为它的底层，假如我们需要实例化这个 Service，你可能要每次都要搞清这个 Service 所有底层类的构造函数，这可能会把人逼疯。如果利用 IOC 的话，你只需要配置好，然后在需要的地方引用就行了，这大大增加了项目的可维护性且降低了开发难度。Spring的IOC有三种注入方式 ：构造器注入、setter方法注入、根据注解注入。
+
+**4.springAOP理解？**
+
+​	OOP面向对象，允许开发者定义纵向的关系，但并适用于定义横向的关系，导致了大量代码的重复，而不利于各个模块的重用。
+
+AOP，一般称为面向切面，作为面向对象的一种补充，用于将那些与业务无关，但却对多个对象产生影响的公共行为和逻辑，抽取并封装为一个可重用的模块，这个模块被命名为“切面”（Aspect），减少系统中的重复代码，降低了模块间的耦合度，同时提高了系统的可维护性。可用于权限认证、日志、事务处理。
+
+​	AOP实现的关键在于 代理模式，AOP代理主要分为静态代理和动态代理。静态代理的代表为AspectJ；动态代理则以Spring AOP为代表。
+
+（1）AspectJ是静态代理的增强，所谓静态代理，就是AOP框架会在编译阶段生成AOP代理类，因此也称为编译时增强，他会在编译阶段将AspectJ(切面)织入到Java字节码中，运行的时候就是增强之后的AOP对象。
+
+（2）Spring AOP使用的动态代理，所谓的动态代理就是说AOP框架不会去修改字节码，而是每次运行时在内存中临时为方法生成一个AOP对象，这个AOP对象包含了目标对象的全部方法，并且在特定的切点做了增强处理，并回调原对象的方法。
+
+**Spring AOP中的动态代理主要有两种方式，JDK动态代理和CGLIB动态代理：**
+
+​        ①JDK动态代理只提供接口的代理，不支持类的代理。核心InvocationHandler接口和Proxy类，InvocationHandler 通过invoke()方法反射来调用目标类中的代码，动态地将横切逻辑和业务编织在一起；接着，Proxy利用 InvocationHandler动态创建一个符合某一接口的的实例,  生成目标类的代理对象。
+
+        ②如果**代理类没有实现 InvocationHandler 接口**，那么Spring AOP会选择使用CGLIB来动态代理目标类。CGLIB（Code Generation Library），是一个代码生成的类库，可以在运行时动态的生成指定类的一个子类对象，并覆盖其中特定方法并添加增强代码，从而实现AOP。CGLIB是通过继承的方式做的动态代理，因此如果某个类被标记为final，那么它是无法使用CGLIB做动态代理的。
+
+（3）静态代理与动态代理区别在于生成AOP代理对象的时机不同，相对来说AspectJ的静态代理方式具有更好的性能，但是AspectJ需要特定的编译器进行处理，而Spring AOP则无需特定的编译器处理。
+**JDK动态代理实例（被代理类要有接口）：**
+
+```java
+//首先被代理的类需要实现一个接口
+public interface ProxyInterface {
+    public void say(String str);
+}
+
+//然后写一个实现类   也就是需要被代理的类
+public class ProxyImpl implements ProxyInterface {
+    @Override
+    public void say(String str) {
+        System.out.println("ProxyImpl.say is " +str);
+    }
+}
+
+//然后写代理类
+public class ProxyClass implements InvocationHandler {
+    Object o;
+    public void setTarget(Object o){
+        this.o = o;
+    }
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        System.out.println("在调用方法之前执行的方法");   
+        method.invoke(o,args);
+        System.out.println("在调用方法之后执行的操作");
+        return null;
+    }
+}
+
+//调用
+//    jdk动态代理
+    public static void main(String[] args) {
+        ProxyInterface proxyInterface = new ProxyImpl();
+        ProxyClass proxyClass = new ProxyClass();
+        proxyClass.setTarget(proxyInterface);
+	//传递被代理类的类加载器 接口  代理类  返回被代理类
+        ProxyInterface proxy = (ProxyInterface)Proxy.newProxyInstance(proxyInterface.getClass().getClassLoader(),proxyInterface.getClass().getInterfaces(),proxyClass);
+        System.out.println("------------------------------------------");
+        proxy.say("hello");
+
+        System.out.println(proxy.getClass().getName());
+        System.out.println(proxyInterface.getClass().getName());
+    }
+
+```
+
+**CGLIB动态代理实例（被代理类不需要要有接口）：**
+
+```java
+cglib动态代理的实现，原理
+ 
+//被代理类 注意相对于jdk动态代理 cglib不需要一个公共接口-
+package com.xyd.cglib;
+
+public class CglibService {
+
+    public  void  say(){
+        System.out.println("我是被代理的方法 也叫做委托类");
+    }
+}
+
+//实现cglib的接口MethodInterceptor
+
+package com.xyd.cglib;
+
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
+
+import java.lang.reflect.Method;
+
+public class CglibProxy implements MethodInterceptor {
+
+    Object o;
+
+    public Object getInstance(Object targer){
+        this.o = targer;
+        //cglib的核心原理 不需要接口，而是继承委托类
+        Enhancer enhancer = new Enhancer();
+        //产生目标类的子类
+        enhancer.setSuperclass(this.o.getClass());
+        //设置回调方法是MethodInterceptor的实现类
+        enhancer.setCallback(this);
+        //实例化我们构建的子类
+        return enhancer.create();
+    }
+    public Object intercept(Object obj, 
+    		Method method, 
+    		Object[] args, MethodProxy proxy) throws Throwable {
+        System.out.println("访问控制系统 启动···");
+        proxy.invokeSuper(obj,args);
+        System.out.println("你可真能闹儿");
+        return null;
+    }
+}
+
+
+//调用代码
+package com.xyd.cglib;
+
+public class MainCglib {
+    public static void main(String[] args) {
+        CglibService cglibService = new CglibService();
+        CglibProxy cglibProxy = new CglibProxy();
+        CglibService cglibSay = 
+        (CglibService)cglibProxy.getInstance(cglibService);
+        cglibSay.say();
+    }
+}
+```
+
+**5.BeanFactory和ApplicationContext有什么区别？**
+
+​	BeanFactory和ApplicationContext是Spring的两大核心接口，都可以当做Spring的容器。其中ApplicationContext是BeanFactory的子接口。
+
+（1）BeanFactory：是Spring里面最底层的接口，包含了各种Bean的定义，读取bean配置文档，管理bean的加载、实例化，控制bean的生命周期，维护bean之间的依赖关系。ApplicationContext接口作为BeanFactory的派生，除了提供BeanFactory所具有的功能外，还提供了更完整的框架功能：
+
+①继承MessageSource，因此支持国际化。
+
+②统一的资源文件访问方式。
+
+③提供在监听器中注册bean的事件。
+
+④同时加载多个配置文件。
+
+⑤载入多个（有继承关系）上下文 ，使得每一个上下文都专注于一个特定的层次，比如应用的web层。
+
+（2）①BeanFactroy采用的是延迟加载形式来注入Bean的，即只有在使用到某个Bean时(调用getBean())，才对该Bean进行加载实例化。这样，我们就不能发现一些存在的Spring的配置问题。如果Bean的某一个属性没有注入，BeanFacotry加载后，直至第一次使用调用getBean方法才会抛出异常。
+
+        ②ApplicationContext，它是在容器启动时，一次性创建了所有的Bean。这样，在容器启动时，我们就可以发现Spring中存在的配置错误，这样有利于检查所依赖属性是否注入。 ApplicationContext启动后预载入所有的单实例Bean，通过预载入单实例bean ,确保当你需要的时候，你就不用等待，因为它们已经创建好了。
+
+        ③相对于基本的BeanFactory，ApplicationContext 唯一的不足是占用内存空间。当应用程序配置Bean较多时，程序启动较慢。
+
+（3）BeanFactory通常以编程的方式被创建，ApplicationContext还能以声明的方式创建，如使用ContextLoader。
+
+（4）BeanFactory和ApplicationContext都支持BeanPostProcessor、BeanFactoryPostProcessor的使用，但两者之间的区别是：BeanFactory需要手动注册，而ApplicationContext则是自动注册
+
+**6、请解释Spring Bean的生命周期？**
+
+Servlet的生命周期：实例化，初始init，接收请求service，销毁destroy；
+
+Spring上下文中的Bean生命周期也类似，如下：
+
+（1）实例化Bean：
+
+对于BeanFactory容器，当客户向容器请求一个尚未初始化的bean时，或初始化bean的时候需要注入另一个尚未初始化的依赖时，容器就会调用createBean进行实例化。对于ApplicationContext容器，当容器启动结束后，通过获取BeanDefinition对象中的信息，实例化所有的bean。
+
+（2）设置对象属性（依赖注入）：
+
+实例化后的对象被封装在BeanWrapper对象中，紧接着，Spring根据BeanDefinition中的信息 以及 通过BeanWrapper提供的设置属性的接口完成依赖注入。
+
+（3）处理Aware接口：
+
+接着，Spring会检测该对象是否实现了xxxAware接口，并将相关的xxxAware实例注入给Bean：
+
+①如果这个Bean已经实现了BeanNameAware接口，会调用它实现的setBeanName(String beanId)方法，此处传递的就是Spring配置文件中Bean的id值；
+
+②如果这个Bean已经实现了BeanFactoryAware接口，会调用它实现的setBeanFactory()方法，传递的是Spring工厂自身。
+
+③如果这个Bean已经实现了ApplicationContextAware接口，会调用setApplicationContext(ApplicationContext)方法，传入Spring上下文；
+
+（4）BeanPostProcessor：
+
+如果想对Bean进行一些自定义的处理，那么可以让Bean实现了BeanPostProcessor接口，那将会调用postProcessBeforeInitialization(Object obj, String s)方法。
+
+（5）InitializingBean 与 init-method：
+
+如果Bean在Spring配置文件中配置了 init-method 属性，则会自动调用其配置的初始化方法。
+
+（6）如果这个Bean实现了BeanPostProcessor接口，将会调用postProcessAfterInitialization(Object obj, String s)方法；由于这个方法是在Bean初始化结束时调用的，所以可以被应用于内存或缓存技术；
+
+以上几个步骤完成后，Bean就已经被正确创建了，之后就可以使用这个Bean了。
+
+（7）DisposableBean：
+
+当Bean不再需要时，会经过清理阶段，如果Bean实现了DisposableBean这个接口，会调用其实现的destroy()方法；
+
+（8）destroy-method：
+
+最后，如果这个Bean的Spring配置中配置了destroy-method属性，会自动调用其配置的销毁方法。
+
+**7、 解释Spring支持的几种bean的作用域？**
+
+Spring容器中的bean可以分为5个范围：
+
+（1）singleton：默认，每个容器中只有一个bean的实例，单例的模式由BeanFactory自身来维护。
+
+（2）prototype：为每一个bean请求提供一个实例。
+
+（3）request：为每一个网络请求创建一个实例，在请求完成以后，bean会失效并被垃圾回收器回收。
+
+（4）session：与request范围类似，确保每个session中有一个bean的实例，在session过期后，bean会随之失效。
+
+（5）global-session：全局作用域，global-session和Portlet应用相关。当你的应用部署在Portlet容器中工作时，它包含很多portlet。如果你想要声明让所有的portlet共用全局的存储变量的话，那么这全局变量需要存储在global-session中。全局作用域与Servlet中的session作用域效果相同。
+
+**8、Spring框架中的单例Beans是线程安全的么？**
+
+​	Spring框架并没有对单例bean进行任何多线程的封装处理。关于单例bean的线程安全和并发问题需要开发者自行去搞定。但实际上，大部分的Spring bean并没有可变的状态(比如Serview类和DAO类)，所以在某种程度上说Spring的单例bean是线程安全的。如果你的bean有多种状态的话（比如 View Model 对象），就需要自行保证线程安全。最浅显的解决办法就是将多态bean的作用域由“singleton”变更为“prototype”。
+
+**9、Spring如何处理线程并发问题？**
+
+​	在一般情况下，只有无状态的Bean才可以在多线程环境下共享，在Spring中，绝大部分Bean都可以声明为singleton作用域，因为Spring对一些Bean中非线程安全状态采用ThreadLocal进行处理，解决线程安全问题。
+
+​	ThreadLocal和线程同步机制都是为了解决多线程中相同变量的访问冲突问题。同步机制采用了“时间换空间”的方式，仅提供一份变量，不同的线程在访问前需要获取锁，没获得锁的线程则需要排队。而ThreadLocal采用了“空间换时间”的方式。
+
+​	ThreadLocal会为每一个线程提供一个独立的变量副本，从而隔离了多个线程对数据的访问冲突。因为每一个线程都拥有自己的变量副本，从而也就没有必要对该变量进行同步了。ThreadLocal提供了线程安全的共享对象，在编写多线程代码时，可以把不安全的变量封装进ThreadLocal。
+
+**10-1、Spring基于xml注入bean的几种方式：**
+
+（1）Set方法注入；
+
+（2）构造器注入：①通过index设置参数的位置；②通过type设置参数类型；
+
+（3）静态工厂注入；
+
+（4）实例工厂；
+
+**10-2、Spring的自动装配：**
+
+在spring中，对象无需自己查找或创建与其关联的其他对象，由容器负责把需要相互协作的对象引用赋予各个对象，使用autowire来配置自动装载模式。
+
+在Spring框架xml配置中共有5种自动装配：
+
+（1）no：默认的方式是不进行自动装配的，通过手工设置ref属性来进行装配bean。
+
+（2）byName：通过bean的名称进行自动装配，如果一个bean的 property 与另一bean 的name 相同，就进行自动装配。 
+
+（3）byType：通过参数的数据类型进行自动装配。
+
+（4）constructor：利用构造函数进行装配，并且构造函数的参数通过byType进行装配。
+
+（5）autodetect：自动探测，如果有构造方法，通过 construct的方式自动装配，否则使用 byType的方式自动装配。
+
+@Autowired可用于：构造函数、成员变量、Setter方法
+
+注：@Autowired和@Resource之间的区别
+
+(1) @Autowired默认是按照类型装配注入的，默认情况下它要求依赖对象必须存在（可以设置它required属性为false）。
+
+(2) @Resource默认是按照名称来装配注入的，只有当找不到与名称匹配的bean才会按照类型来装配注入。
+
+**11、Spring 框架中都用到了哪些设计模式？**
+
+（1）工厂模式：BeanFactory就是简单工厂模式的体现，用来创建对象的实例；
+
+（2）单例模式：Bean默认为单例模式。
+
+（3）代理模式：Spring的AOP功能用到了JDK的动态代理和CGLIB字节码生成技术；
+
+（4）模板方法：用来解决代码重复的问题。比如. RestTemplate, JmsTemplate, JpaTemplate。
+
+（5）观察者模式：定义对象键一种一对多的依赖关系，当一个对象的状态发生改变时，所有依赖于它的对象都会得到通知被制动更新，如Spring中listener的实现--ApplicationListener。
+
+**12、Spring事务的实现方式和实现原理：**
+
+Spring事务的本质其实就是数据库对事务的支持，没有数据库的事务支持，spring是无法提供事务功能的。真正的数据库层的事务提交和回滚是通过binlog或者redo log实现的。
+
+（1）Spring事务的种类：
+
+spring支持编程式事务管理和声明式事务管理两种方式：
+
+①编程式事务管理使用TransactionTemplate。
+
+②声明式事务管理建立在AOP之上的。其本质是通过AOP功能，对方法前后进行拦截，将事务处理的功能编织到拦截的方法中，也就是在目标方法开始之前加入一个事务，在执行完目标方法之后根据执行情况提交或者回滚事务。
+
+声明式事务最大的优点就是不需要在业务逻辑代码中掺杂事务管理的代码，只需在配置文件中做相关的事务规则声明或通过@Transactional注解的方式，便可以将事务规则应用到业务逻辑中。
+
+声明式事务管理要优于编程式事务管理，这正是spring倡导的非侵入式的开发方式，使业务代码不受污染，只要加上注解就可以获得完全的事务支持。唯一不足地方是，最细粒度只能作用到方法级别，无法做到像编程式事务那样可以作用到代码块级别。
+
+（2）spring的事务传播行为：
+
+spring事务的传播行为说的是，当多个事务同时存在的时候，spring如何处理这些事务的行为。
+
+① PROPAGATION_REQUIRED：如果当前没有事务，就创建一个新事务，如果当前存在事务，就加入该事务，该设置是最常用的设置。
+
+② PROPAGATION_SUPPORTS：支持当前事务，如果当前存在事务，就加入该事务，如果当前不存在事务，就以非事务执行。‘
+
+③ PROPAGATION_MANDATORY：支持当前事务，如果当前存在事务，就加入该事务，如果当前不存在事务，就抛出异常。
+
+④ PROPAGATION_REQUIRES_NEW：创建新事务，无论当前存不存在事务，都创建新事务。
+
+⑤ PROPAGATION_NOT_SUPPORTED：以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。
+
+⑥ PROPAGATION_NEVER：以非事务方式执行，如果当前存在事务，则抛出异常。
+
+⑦ PROPAGATION_NESTED：如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则按REQUIRED属性执行。
+
+（3）Spring中的隔离级别：
+
+① ISOLATION_DEFAULT：这是个 PlatfromTransactionManager 默认的隔离级别，使用数据库默认的事务隔离级别。
+
+② ISOLATION_READ_UNCOMMITTED：读未提交，允许另外一个事务可以看到这个事务未提交的数据。
+
+③ ISOLATION_READ_COMMITTED：读已提交，保证一个事务修改的数据提交后才能被另一事务读取，而且能看到该事务对已有记录的更新。
+
+④ ISOLATION_REPEATABLE_READ：可重复读，保证一个事务修改的数据提交后才能被另一事务读取，但是不能看到该事务对已有记录的更新。
+
+⑤ ISOLATION_SERIALIZABLE：一个事务在执行的过程中完全看不到其他事务对数据库所做的更新。
+
+**13、Spring框架中有哪些不同类型的事件？**
+
+Spring 提供了以下5种标准的事件：
+
+（1）上下文更新事件（ContextRefreshedEvent）：在调用ConfigurableApplicationContext 接口中的refresh()方法时被触发。
+
+（2）上下文开始事件（ContextStartedEvent）：当容器调用ConfigurableApplicationContext的Start()方法开始/重新开始容器时触发该事件。
+
+（3）上下文停止事件（ContextStoppedEvent）：当容器调用ConfigurableApplicationContext的Stop()方法停止容器时触发该事件。
+
+（4）上下文关闭事件（ContextClosedEvent）：当ApplicationContext被关闭时触发该事件。容器被关闭时，其管理的所有单例Bean都被销毁。
+
+（5）请求处理事件（RequestHandledEvent）：在Web应用中，当一个http请求（request）结束触发该事件。
+
+如果一个bean实现了ApplicationListener接口，当一个ApplicationEvent 被发布以后，bean会自动被通知。
+
+**14、解释一下Spring AOP里面的几个名词：**
+
+（1）切面（Aspect）：被抽取的公共模块，可能会横切多个对象。 在Spring AOP中，切面可以使用通用类（基于模式的风格） 或者在普通类中以 @AspectJ 注解来实现。
+
+（2）连接点（Join point）：指方法，在Spring AOP中，一个连接点 总是 代表一个方法的执行。 
+
+（3）通知（Advice）：在切面的某个特定的连接点（Join point）上执行的动作。通知有各种类型，其中包括“around”、“before”和“after”等通知。许多AOP框架，包括Spring，都是以拦截器做通知模型， 并维护一个以连接点为中心的拦截器链。
+
+（4）切入点（Pointcut）：切入点是指 我们要对哪些Join point进行拦截的定义。通过切入点表达式，指定拦截的方法，比如指定拦截add*、search*。
+
+（5）引入（Introduction）：（也被称为内部类型声明（inter-type declaration））。声明额外的方法或者某个类型的字段。Spring允许引入新的接口（以及一个对应的实现）到任何被代理的对象。例如，你可以使用一个引入来使bean实现 IsModified 接口，以便简化缓存机制。
+
+（6）目标对象（Target Object）： 被一个或者多个切面（aspect）所通知（advise）的对象。也有人把它叫做 被通知（adviced） 对象。 既然Spring AOP是通过运行时代理实现的，这个对象永远是一个 被代理（proxied） 对象。
+
+（7）织入（Weaving）：指把增强应用到目标对象来创建新的代理对象的过程。Spring是在运行时完成织入。
+
+切入点（pointcut）和连接点（join point）匹配的概念是AOP的关键，这使得AOP不同于其它仅仅提供拦截功能的旧技术。 切入点使得定位通知（advice）可独立于OO层次。 例如，一个提供声明式事务管理的around通知可以被应用到一组横跨多个对象中的方法上（例如服务层的所有业务操作）。
+
+![icon](/assert/24.png)
+
+**15、Spring通知有哪些类型？**
+
+（1）前置通知（Before advice）：在某连接点（join point）之前执行的通知，但这个通知不能阻止连接点前的执行（除非它抛出一个异常）。
+
+（2）返回后通知（After returning advice）：在某连接点（join point）正常完成后执行的通知：例如，一个方法没有抛出任何异常，正常返回。 
+
+（3）抛出异常后通知（After throwing advice）：在方法抛出异常退出时执行的通知。 
+
+（4）后通知（After (finally) advice）：当某连接点退出的时候执行的通知（不论是正常返回还是异常退出）。 
+
+（5）环绕通知（Around Advice）：包围一个连接点（join point）的通知，如方法调用。这是最强大的一种通知类型。 环绕通知可以在方法调用前后完成自定义的行为。它也会选择是否继续执行连接点或直接返回它们自己的返回值或抛出异常来结束执行。 环绕通知是最常用的一种通知类型。大部分基于拦截的AOP框架，例如Nanning和JBoss4，都只提供环绕通知。 同一个aspect，不同advice的执行顺序：
+
+```java
+同一个aspect，不同advice的执行顺序：
+
+①没有异常情况下的执行顺序：
+
+around before advice
+before advice
+target method 执行
+around after advice
+after advice
+afterReturning
+
+②有异常情况下的执行顺序：
+
+around before advice
+before advice
+target method 执行
+around after advice
+after advice
+afterThrowing:异常发生
+java.lang.RuntimeException: 异常发生
+```
+
+
+
+
+
