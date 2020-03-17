@@ -16,7 +16,7 @@ java相关的博客：<https://blog.kuangstudy.com/>
 
 **3.面向对象的特征有哪些方面**
 
-​     封装（高度自治的封闭个体，对外提供获取自己或改变自己的方法），继承（可以继承一个类的的同时改变其中的一些内容），多态（已用变量指向具体类型 父类已用指向子类对象），抽象（把现实生活中的共同特征对象抽象为类）
+​     封装（高度自治的封闭个体，对外提供获取自己或改变自己的方法），继承（可以继承一个类的的同时改变其中的一些内容），多态（引用变量指向具体类型 父类已用指向子类对象），抽象（把现实生活中的共同特征对象抽象为类）
 
 **4.基本类型与包装类型**
 
@@ -42,7 +42,7 @@ string 是内容不可变的字符串，底层是一个不可变的字符数组�
 
 ​	list是有序的可重复的
 
-​	set是无序的部可重复的，根据equals和hashcode来判断，也就是如果宇哥对象要存储到set中必须要重写equals和hashcode方法
+​	set是无序的不可重复的，根据equals和hashcode来判断，也就是如果一个对象要存储到set中必须要重写equals和hashcode方法
 
 **8.list**
 
@@ -110,7 +110,7 @@ arraylist使用在查询比较多，但是插入和删除比较少的情况，li
 
 ​	所有的jsp文件都会被翻译为一个继承HttpServlet的类，也就是jsp最终也是一个servlet，这个servlet对外提供服务
 
-​	不同点：jsp侧重于视图，而servlet主要用于控制逻辑
+​	不同点：jsp侧重于视图，而servlet主要用于控制逻辑l
 
 ​	jsp中9个内置对象：
 
@@ -238,9 +238,10 @@ request域（每次HTTP请求回创建一个新的bean）  session域（在一�
 
 **37.如何解决中文乱码问题？**
 
-​	post请求中在charetfilter中设置encoding值，我满五年可以在web.xml中设置初始化参数
+​	post请求中在charetfilter中设置encoding值，我们可以在web.xml中设置初始化参数
 
-  <init-param>  
+```html
+ <init-param>  
 
 ​	<param-name>encoding</param-name>
 
@@ -255,10 +256,11 @@ request域（每次HTTP请求回创建一个新的bean）  session域（在一�
 ​        <param-value>true</param-value>
 
 <init-param> 
+```
 
 针对get请求乱码问题最简单的就是修改tomcat的server.xml来修改urlencoding=utf-8
 
-**38.Mybatis中当实体类中的属性名和表中的字段名部一样，怎么办？**
+**38.Mybatis中当实体类中的属性名和表中的字段名不一样，怎么办？**
 
 ​	解决方案：
 
@@ -267,6 +269,72 @@ request域（每次HTTP请求回创建一个新的bean）  session域（在一�
 ​	2.在mybatis的全局配置文件开启驼峰命名规则，在mybatis-config。xml中
 
 ​	3.在mapper的映射文件中使用resultMap来自定义映射规则
+
+A.单表查询
+
+```xml
+<select id="selll" resultMap="userMap">       
+ select id u_id,name u_name,age u_age from users
+</select>
+ <resultMap type="com.zhiyou100.xf.bean.Users" id="userMap">
+  <id column="u_id" property="id"/><!--作为唯一标识的映射-->
+  <result column="u_name" property="name"/><!--其他普通字段的映射-->
+  <result column="u_age" property="age"/><!--property实体类中的属性名，cloumn：表中的字段名-->
+</resultMap>
+```
+
+B.关联查询 一对一、多对一  实体类中将另一个类作为属性association
+
+一对一：
+
+```xml
+<!-方式一：嵌套结果：使用嵌套结果映射来处理重复的联合结果的子集 封装联表查询的数据(去除重复的数据) select * from class c, teacher t where c.teacher_id=t.t_id and c.c_id=1 -->
+
+ <select id="getClass" parameterType="int" resultMap="ClassResultMap">
+ select * from class c, teacher t where c.teacher_id=t.t_id and c.c_id=#{id} 
+</select> 
+<resultMap type="_Classes" id="ClassResultMap">
+ <id property="id" column="c_id"/> 
+<result property="name" column="c_name"/>
+ <association property="teacher" column="teacher_id" javaType="_Teacher">
+ <id property="id" column="t_id"/> <result property="name" column="t_name"/> </association> 
+</resultMap>
+<!-
+方式二：嵌套查询：通过执行另外一个 SQL 映射语句来返回预期的复杂类型 SELECT * FROM class WHERE c_id=1; SELECT*FROMteacherWHEREt_id=1 //1 是上一个查询得到的 teacher_id 的值
+-->
+<select id="getClass2" parameterType="int" resultMap="ClassResultMap2"> 
+select * from class where c_id=#{id} 
+</select> 
+<resultMap type="_Classes" id="ClassResultMap2"> 
+<id property="id" column="c_id"/> 
+<result property="name" column="c_name"/>
+ <association property="teacher" column="teacher_id" javaType="_Teacher" select="getTeacher">
+ </association> 
+</resultMap>
+<select id="getTeacher" parameterType="int" resultType="_Teacher"> 
+SELECT t_id id, t_name name FROM teacher WHERE t_id=#{id} 
+</select>
+```
+
+一对多： 实体类中将另一个类的list作为属性collection 
+
+```xml
+<select id="selAll" resultMap="AllMap">
+        select * from teacher,student,class where c_id=class_id and teacher_id=t_id and c_id=#{id}
+    </select>
+    <resultMap type="com.zhiyou100.xf.bean.Classes" id="AllMap">
+        <id column="c_id" property="cid"/>
+        <result column="c_name" property="cname"/>
+        <association property="teacher" javaType="com.zhiyou100.xf.bean.Teacher">
+            <id column="t_id" property="tid"/>
+            <result column="t_name" property="tname"/>
+        </association>
+        <collection property="students" ofType="com.zhiyou100.xf.bean.Student">
+            <id column="s_id" property="sid"/>
+            <result column="s_name" property="sname"/>
+        </collection>
+    </resultMap>
+```
 
 **39.linux系统常用服务类相关命令？**
 
@@ -374,7 +442,7 @@ git config  --unset i18n.commitencoding
 
 ​	实例变量放在堆内存中；静态变量+常量（private，static，final，string）+类信息+运行时常量存在方法区    **栈管运行  ，堆管存储**  **垃圾回收只发生在堆中**   **jvm优化主要是优化堆**
 
-​	基本类型的变量和对象的引用变量都是在函数的栈内存中分配，栈中部存在垃圾回收问题
+​	基本类型的变量和对象的引用变量都是在函数的栈内存中分配，栈中不存在垃圾回收问题
 
  ![icon](/assert/1582772943186.png)
 
@@ -382,9 +450,9 @@ git config  --unset i18n.commitencoding
 
 养老区：一般是数据库连接池这种池类对象在这；
 
-永久区：没有垃圾回收用于 存放运行环境所必需的的类信息，关闭jvm才释放内存 java7叫做永久代，java8叫做元空间
+永久区：没有垃圾回收用于存放运行环境所必需的的类信息，关闭jvm才释放内存 java7叫做永久代，java8叫做元空间
 
-![icon](/assert/1582774755868.png
+![icon](/assert/1582774755868.png)
 
 ​		![icon](/assert/1582775750485.png)
 
@@ -393,8 +461,6 @@ git config  --unset i18n.commitencoding
 ![icon](/assert/1582776717992.png)
 
 永久代就是方法区
-
-
 
 ![icon](/assert/1582778144272.png)
 
@@ -408,7 +474,7 @@ GC是什么？
 
 ​     **红黑树** ：如果出现单边增长的话他会自平衡，但是如果存储大数据量的话它的树的高度会很大，导致磁盘IO会很频繁
 
-![58288240418](/../../../ADMINI~1/AppData/Local/Temp/1582882404182.png)   
+![icon](/assert/1582882404182.png)   
 
 ​      **hash表**  只要走了hash不管你的表的数据有多大，通过hash运算只需要一次磁盘io就能找到数据地址，但是如果是范围查找，hash算法就不行了
 
@@ -434,7 +500,7 @@ GC是什么？
 
 ​	.ibd:
 
-​	什么是聚集索引？ 叶节点包含了完整的数据记录（把所引元素和数据元素聚集到一起）
+​	什么是聚集索引？ 叶节点包含了完整的数据记录（把索引元素和数据元素聚集到一起）
 
 ​		innodb的主键索引其实就是聚集索引 myisam就是非聚集所引
 
@@ -569,7 +635,7 @@ spring整合shiro
 
 自定义relam ：真正实现登录校验的人，shiro只是去调用它 。
 
-shiro的三个核心组件：subject（主题）    SecurityManger（安全管理器）    Relam(数据源)。
+shiro的三个核心组件：**subject（主题）**    **SecurityManger（安全管理器）**    **Relam(数据源)**。
 
 **52.springsecurity？**
 
@@ -1642,6 +1708,32 @@ after advice
 afterThrowing:异常发生
 java.lang.RuntimeException: 异常发生
 ```
+
+**58.两个相同的微服务间怎么保证数据的一致性？**
+
+分布式锁实现方法
+1.通过zookeeper的节点唯一性（推荐使用）
+
+​		多个Jvm同时在Zookeeper上创建同一个相同的节点( /Lock)zk节点唯一的！ 不能重复！节点类型为临时节点， jvm1创建成功时候，jvm2和jvm3创建节点时候会报错，该节点已经存在。这时候 jvm2和jvm3进行等待。   jvm1的程序现在执行完毕，执行释放锁。关闭当前会话。临时节点不复存在了并且事件通知Watcher，jvm2和jvm3继续创建     
+
+​		 ps：zk强制关闭时候，通知会有延迟。但是close（）方法关闭时候，延迟小2.通过redis的setnx来实现，该命令只能set不存在的值，如果set存在的值就会set失败（有死锁问题
+3.也可以乐观锁，使用sql来解决库存超卖问题，在sql中判断 updat tb_stock set stock=stock-1 and stock>=1
+
+**59.CAS单点登陆时的数据保存在哪？**
+
+​		Cas Server端提供注册功能并维护用户通用信息，Cas Client端维护用户详细信息。腾讯等大型网站就是这样做的。
+
+​		Cas Server端建一个集中注册和维护的用户信息库，仅存放通用信息，例如身份证号、员工编号、姓名和口令等等，CAS在此用户库上进行集中认证。可以用一个LDAP服务器，如ActiveDirectory来集中管理这个用户信息库。
+
+当用户通过CAS验证访问客户端应用时，CAS传递用户凭证（身份证号、员工编号、姓名），客户端须判断该用户凭证是否在本系统中存在，如果已存在则自动进入系统，并遵循客户端权限管理； 
+
+如果用户凭证在客户端应用中没有保存过，则根据业务需要判断CAS提供的用户通用信息是否足够用，若够用直接后台写入本系统用户表，然后进入系统；如果还需补充其它信息则弹出注册页面，显示通用信息，用户补充填入其它信息后提交，这样用户下次再访问本系统时就可以自动进入。
+
+像QQ的应用，你登录时，就是手机、邮箱、密码这类通用的信息，这些信息就保存在CASServer端。进入各应用后，再完善扩展信息，如工作经验、性别、地区等，这个就好比QQ里微博信息的完善，像QQ校友里的学校的设置等等。
+
+如果用户在业务系统中原本就有账户信息（在单点登录系统实施前的旧系统），则在上诉注册页面让用户选择绑定原有账户，输入原客户端应用的登录名和登录口令，验证通过后将用户的CAS凭证和旧账户绑定保存在客户端用户表中，这样用户再次访问客户端应用时就可以使用原账户的相关信息。
+
+**60.springboot创建bean怎么创建？**
 
 
 
