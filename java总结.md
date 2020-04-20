@@ -1768,6 +1768,10 @@ java.lang.RuntimeException: 异常发生
 
 **60.springboot创建bean怎么创建？**
 
+1.直接类上加注解@Component@Controller@Service 。。。
+
+2.使用@Bean注解配合@Configuration注解
+
 **61.java反射**
 
 反射的作用：
@@ -1942,4 +1946,41 @@ GROUP BY
     workID ) tempt
 	)
 ```
+
+**66.Mabits中${}和#{}区别？**
+
+#{} 和 ${} 在使用中的技巧和建议
+
+（1）不论是单个参数，还是多个参数，一律都建议使用注解@Param("")
+
+（2）能用 #{} 的地方就用 #{}，不用或少用 ${}  
+
+（3）表名作参数时，必须用 ${}。如：select * from ${tableName}  
+
+（4）order by 时，必须用 ${}。如：select * from t_user order by ${columnName}  
+
+（5）使用 ${} 时，要注意何时加或不加单引号，即 ${} 和 '${}'
+
+**67.并发编程相关**
+
+并发编程的源头：1， 缓存导致的可见性 ；2， 线程切换带来的原子性问题 ；3， 编译优化的有序性问题 
+
+java内存模型：解决可见性和有序性：
+
+ 可见性的原因是缓存,有序性的原因是编译优化,那解决的最直接的办法就是禁用缓存和编译优化,但是有缓存和编译优化的目的是提高程序性能,禁用了程序的性能如何保证? 合理的方案是按需禁用缓存和编译优化,Java内存模型规范了JVM如何提供按需禁用缓存和编译优化的方法,具体的,这些方法包括**volatile,synchronized和final三个关键字,以及六项Happens-Before规则** 
+
+**Volatile**关键字：
+
+ volatile关键字用来声明变量,告诉编译器这个变量的读写不能使用CPU缓存,必须从内存中读写. 
+
+**68.springcloude相关**
+
+@EnableDiscoveryClient和@EnableEurekaClient共同点就是：都是能够让注册中心能够发现，扫描到改服务。
+
+不同点：@EnableEurekaClient只适用于Eureka作为注册中心，@EnableDiscoveryClient 可以是其他注册中心。
+@SpringBootApplication：由@SpringBootConfiguration,@EnableAutoConfiguration,@ComponentScan组成
+
+@EnableZuulProxy： @EnableZuulProxy简单理解为@EnableZuulServer的增强版，当Zuul与Eureka、Ribbon等组件配合使用时，我们使用@EnableZuulProxy。  
+
+
 
