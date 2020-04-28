@@ -2021,7 +2021,393 @@ java内存模型：解决可见性和有序性：
 不同点：@EnableEurekaClient只适用于Eureka作为注册中心，@EnableDiscoveryClient 可以是其他注册中心。
 @SpringBootApplication：由@SpringBootConfiguration,@EnableAutoConfiguration,@ComponentScan组成
 
-@EnableZuulProxy： @EnableZuulProxy简单理解为@EnableZuulServer的增强版，当Zuul与Eureka、Ribbon等组件配合使用时，我们使用@EnableZuulProxy。  
+@EnableZuulProxy： @EnableZuulProxy简单理解为@EnableZuulServer的增强版，当Zuul与Eureka、Ribbon等组件配合使用时，我们使用@EnableZuulProxy
 
+**69.String类？**
 
+```java
+package com.heima.scanner;
+ 
+public class test {
+ 
+    /**
+     * 面试题一
+     * 确定打印输出的值真假
+     * @param args
+     * equals:将此字符串与指定的对象比较。当且仅当该参数不为 null，
+     * 并且是与此对象表示相同字符序列的 String 对象时，结果才为 true。
+     *
+     * ==   
+     *
+     *
+     * 常量池中  当两个量相同时,只存一个地址,节省空间,这是常量池的特点
+     */
+    public static void main(String[] args) {
+        // TODO Auto-generated method stub
+        
+//        String s1 = "abc";
+//        String s2 = "abc";
+//        System.out.println(s1 == s2);
+//        System.out.println(s1.equals(s2));
+        
+        /**
+         * 面试题二
+         * 该语句创建了几个对象
+         * 答案:两个对象,一个在常量池,一个在堆内存中  地址值不同
+         * 有java的api得:
+         * String
+            public String(String original)初始化一个新创建的 String 对象，
+         * 使其表示一个与参数相同的字符序列；
+         * 换句话说，新创建的字符串是该参数字符串的副本。
+         * 由于 String 是不可变的，
+         * 所以无需使用此构造方法，除非需要 original 的显式副本。
+         */
+//        String s1 = new String("abc");
+        
+        /**
+         * 面试题三
+         * 判断 ture 还是false
+         *
+         *
+         * 答案:第一个flase
+         * 解析:前者在堆内存  后者在常量池   == 判断地址值  所以不相等
+         * 第二个:ture
+         */
+ 
+//        String s1 = new String("abc");
+//        String s2 = "abc";
+//        System.out.println(s1 == s2 );     
+//        System.out.println(s1.equals(s2));   
+        
+        /**
+         * 面试题四
+         * 判断真假
+         * 都为真:考点:java中的常量优化机制
+         */
+//        String s1 = "a"+"b"+"c";
+//        String s2 = "abc";
+//        System.out.println(s1 == s2 );     
+//        System.out.println(s1.equals(s2));
+        
+        
+        /**
+         * 面试题五
+         * 判断真假
+         * 第一个为假
+         * 解析:
+         * Java 语言提供对字符串串联符号（"+"）以及将其他对象转换为字符串的特殊支持。
+         * 字符串串联是通过 StringBuilder（或 StringBuffer）类及其 append 方法实现的。
+         * 字符串转换是通过 toString 方法实现的，
+         * 该方法由 Object 类定义，并可被 Java 中的所有类继承。
+         * 在堆内存和常量池   地址值不同
+         *
+         * 第二个为真
+         */
+//        String s1 = "ab";
+//        String s2 = "abc";
+//        String s3 = s1 + "c";
+//        System.out.println(s2 == s3 );     
+//        System.out.println(s2.equals(s3));
+        
+    }
+ 
+}
+```
+
+![](/assert/29.png)
+
+**70.&&与&，||与|的区别？**
+
+&&逻辑与         || 逻辑或   他们都是逻辑运算符
+
+&按位与              |按位或	taa们都是位运算符
+
+a&b  a|b 都是二进制的与或运算
+
+&&也叫短路与  因为只要当前项为假，它就不往后判断了，直接认为表达式为假 
+
+||也叫短路或   因为只要当前项为真，以后就不判断了，直接表达式就为真
+
+&和 |是二进制运算，可以参与布尔运算
+
+**71.尽可能多的写出request的方法？**
+
+```java
+setAttribute(String name,Object object)	//用于设置request中的属性及其属性值
+removeAttribute(String name) 	//删除请求中的一个属性值
+getAttribute(String name) 		//获取请求中的属性值
+getAttributeNames()			//返回request对象所有属性的名字集合，结果是一个枚举的实例
+getCookies()：                //返回客户端的所有Cookie对象，结果是一个Cookie数组
+getCharacterEncoding()：		//返回请求中的字符编码方式
+getContentLength()：         //返回请求的Body的长度实例  
+getInputStream()：			//返回请求的输入流，用于获得请求中的数据
+getMethod()：				//获得客户端向服务器端传送数据的方法
+getParameter(String name)：  //获得客户端传送给服务器端的有name指定的参数值
+getParameterNames()：		//获得客户端传送给服务器端的所有参数的名字，结果是一个枚举的实例
+getParameterValues(String name)：//获得有name指定的参数的所有值   
+getProtocol()：					//获取客户端向服务器端传送数据所依据的协议名称     
+getQueryString()：				//获得查询字符串    
+getRequestURI()：				//获取发出请求字符串的客户端地址
+getRemoteAddr()：				//获取客户端的IP地址
+getRemoteHost()：				//获取客户端的名字  
+getSession([Boolean create])：   //返回和请求相关Session
+getServerName()：				//获取服务器的名字    
+getServletPath()：				//获取客户端所请求的脚本文件的路径    
+```
+
+**72.写出5个java常用的包，类，和接口？**
+
+```
+类：
+1.java.lang.Object
+2.java.lang.String
+3.java.lang.System
+4.java.io.file
+5.java.io.FileInputStream
+6.java.io.FileOutputStream
+
+包：
+1.java.lang包
+2.java.io包
+3.javax.servlet包
+4.java.util包
+5.java.sql包
+
+接口：
+1.java.util.List<E>
+2.java.util.Map<E>
+3.java.util.Iterator<E>
+4.java.sql.CallableStatement
+5.java.lang.Comparable<T>
+6.java.lang.Cloneable
+7.java.io.serializable
+```
+
+**73.写出springboot常用的注解及其作用？**
+
+```java
+1.注解(annotations)列表 
+@SpringBootApplication：包含了@ComponentScan、@Configuration和@EnableAutoConfiguration注解。其中@ComponentScan让spring Boot扫描到Configuration类并把它加入到程序上下文。
+
+@Configuration 等同于spring的XML配置文件；使用Java代码可以检查类型安全。
+
+@EnableAutoConfiguration 自动配置。
+
+@ComponentScan 组件扫描，可自动发现和装配一些Bean。
+
+@Component可配合CommandLineRunner使用，在程序启动后执行一些基础任务。
+
+@RestController注解是@Controller和@ResponseBody的合集,表示这是个控制器bean,并且是将函数的返回值直 接填入HTTP响应体中,是REST风格的控制器。
+
+@Autowired自动导入。
+
+@PathVariable获取参数。
+
+@JsonBackReference解决嵌套外链问题。
+
+@RepositoryRestResourcepublic配合spring-boot-starter-data-rest使用。
+
+@SpringBootApplication：申明让spring boot自动给程序进行必要的配置，这个配置等同于：@Configuration ，@EnableAutoConfiguration 和 @ComponentScan 三个配置。
+
+@Inject：等价于默认的@Autowired，只是没有required属性；
+
+@Component：泛指组件，当组件不好归类的时候，我们可以使用这个注解进行标注。
+
+@Bean:相当于XML中的,放在方法的上面，而不是类，意思是产生一个bean,并交给spring管理。
+
+@AutoWired：自动导入依赖的bean。byType方式。把配置好的Bean拿来用，完成属性、方法的组装，它可以对类成员变量、方法及构造函数进行标注，完成自动装配的工作。当加上（required=false）时，就算找不到bean也不报错。
+
+@Qualifier：当有多个同一类型的Bean时，可以用@Qualifier(“name”)来指定。与@Autowired配合使用。@Qualifier限定描述符除了能根据名字进行注入，但能进行更细粒度的控制如何选择候选者，具体使用方式如下：
+
+@Resource(name=”name”,type=”type”)：没有括号内内容的话，默认byName。与@Autowired干类似的事。
+
+ 
+
+2JPA注解
+@Entity：@Table(name=”“)：表明这是一个实体类。一般用于jpa这两个注解一般一块使用，但是如果表名和实体类名相同的话，@Table可以省略
+
+@MappedSuperClass:用在确定是父类的entity上。父类的属性子类可以继承。
+
+@NoRepositoryBean:一般用作父类的repository，有这个注解，spring不会去实例化该repository。
+
+@Column：如果字段名与列名相同，则可以省略。
+
+@Id：表示该属性为主键。
+
+@GeneratedValue(strategy = GenerationType.SEQUENCE,generator = “repair_seq”)：表示主键生成策略是sequence（可以为Auto、IDENTITY、native等，Auto表示可在多个数据库间切换），指定sequence的名字是repair_seq。
+
+@SequenceGeneretor(name = “repair_seq”, sequenceName = “seq_repair”, allocationSize = 1)：name为sequence的名称，以便使用，sequenceName为数据库的sequence名称，两个名称可以一致。
+
+@Transient：表示该属性并非一个到数据库表的字段的映射,ORM框架将忽略该属性。如果一个属性并非数据库表的字段映射,就务必将其标示为@Transient,否则,ORM框架默认其注解为@Basic。@Basic(fetch=FetchType.LAZY)：标记可以指定实体属性的加载方式
+
+@JsonIgnore：作用是json序列化时将Java bean中的一些属性忽略掉,序列化和反序列化都受影响。
+
+@JoinColumn（name=”loginId”）:一对一：本表中指向另一个表的外键。一对多：另一个表指向本表的外键。
+
+@OneToOne、@OneToMany、@ManyToOne：对应hibernate配置文件中的一对一，一对多，多对一。
+
+3全局异常处理
+@ControllerAdvice：包含@Component。可以被扫描到。统一处理异常。
+
+@ExceptionHandler（Exception.class）：用在方法上面表示遇到这个异常就执行以下方法。
+```
+
+**74.写出ES6新增的几个方法？**
+
+  forEach() 、map()、filter()、reduce()、some()、every()
+
+```js
+1、forEach()
+var arr = [1,2,3,4];
+arr.forEach((item,index,arr) => {
+    console.log(item) //结果为1,2,3,4
+})
+//forEach遍历数组，无返回值，不改变原数组，仅仅只是遍历、常用于注册组件、指令等等。
+2、map()
+var arr = [1,2,3,4];
+arr.map((item,index,arr) => {
+    return item*10 //新数组为10,20,30,40
+})
+//map遍历数组，返回一个新数组，不改变原数组的值。
+3、filter()
+var arr = [1,2,3,4];
+arr.filter((item,index,arr) => {
+    return item > 2 //新数组为[3,4]
+})
+//filter过滤掉数组中不满足条件的值，返回一个新数组，不改变原数组的值。
+ 
+
+4、reduce()
+var arr = [1,2,3,4];
+arr.reduce((result,item,index,arr) => {
+    console.log(result) // 1  3  6  result为上次一计算的结果
+    console.log(item)  // 2  3  4
+    console.log(index) // 1  2  3
+    return result+item //最终结果为10
+})
+//reduce 让数组的前后两项进行某种计算。然后返回其值，并继续计算。不改变原数组，返回计算的最终结果，从数组的第二项开始遍历。
+ 
+
+5、some()
+var arr = [1,2,3,4];
+arr.some((item,index,arr) => {
+    return item > 3 //结果为true
+})
+//遍历数组每一项，有一项返回true,则停止遍历，结果返回true。不改变原数组
+ 
+
+6、every()
+var arr = [1,2,3,4];
+arr.every((item,index,arr) => {
+    return item > 1 //结果为false
+})
+//遍历数组每一项，每一项返回true,则最终结果为true。当任何一项返回false时，停止遍历，返回false。不改变原数组
+```
+
+75.成实例时代码的执行顺序
+
+```java
+一.编写父类对象:
+public class Father {
+    public Father() {
+        // TODO Auto-generated constructor stub
+        System.out.println("我是Father的构造方法");
+    }
+    {
+       System.out.println("我是Father的代码快"); 
+    }
+    static
+    {
+         System.out.println("我是Father的static代码快"); 
+        }
+}
+
+二.编写子类对象:
+
+public class Son extends Father {
+    public Son() {
+        // TODO Auto-generated constructor stub
+        System.out.println("我是Son的构造方法");
+    }
+    {
+       System.out.println("我是Son的代码快");    
+    }
+    static
+    {
+         System.out.println("我是Son的static代码快");    
+        }
+}
+
+三.编写测试类:
+
+public class Test {
+    public static void main(String[] args) {
+        Son son=new Son();
+    }
+}
+
+```
+
+![](/assert/30.png)
+
+**76.cookie，sessionStorage，localStorage之间的区别?**
+
+![](/assert/31.png)
+
+共同点： 都是保存在浏览器端，且同源的。 
+
+区别： 1:cookie数据始终在同源的http请求中携带（即使不需要），即cookie在浏览器和服务器间来回传递。而sessionStorage和localStorage不会自动把数据发给服务器，仅在本地保存。cookie数据还有路径（path）的概念，可以限制cookie只属于某个路径下。
+
+2:存储大小限制也不同，cookie数据不能超过4k，同时因为每次http请求都会携带cookie，所以cookie只适合保存很小的数据，如会话标识。sessionStorage和localStorage 虽然也有存储大小的限制，但比cookie大得多，可以达到5M或更大。
+
+3:数据有效期不同，sessionStorage：仅在当前浏览器窗口关闭前有效，自然也就不可能持久保持；localStorage：始终有效，窗口或浏览器关闭也一直保存，因此用作持久数据；cookie只在设置的cookie过期时间之前一直有效，即使窗口或浏览器关闭。
+
+4:作用域不同，sessionStorage不在不同的浏览器窗口敏感词享，即使是同一个页面；localStorage在所有同源窗口中都是共享的；cookie也是在所有同源窗口中都是共享的。
+
+5:Web Storage支持事件通知机制，可以将数据更新的通知发送给监听者。
+
+6:Web Storage 的 api 接口使用更方便。
+
+ HTML5 提供了两种在客户端存储数据的新方法： 
+
+localStorage - 没有时间限制的数据存储 sessionStorage - 针对一个 session 的数据存储 之前，这些都是由 cookie 完成的。
+
+cookie 不适合大量数据的存储，因为它们由每个对服务器的请求来传递，这使得 cookie 速度很慢而且效率也不高。
+
+localStorage和sessionStorage都具有相同的操作方法，例如setItem()、getItem()和removeItem()等 localStorage和sessionStorage的方法： setItem存储value 用途：将value存储到key字段 用法：.setItem( key, value)
+
+**77.写出git和maven的一些常用命令？**
+
+```
+开发中常用的git命令：
+    查看有变动的文件
+    git status
+    将当前目录下所有有变化目录进行添加
+    git add .
+    将添加的变动提交到本地仓库，提交后git status将看不到有变化文件啦
+    git commit  -m 'mengshanshan update'
+    将git上最新代码拉到本地
+    git pull origin master
+    将本地仓库代码提交到master
+    git push origin master
+    将本地仓库代码提交到master的streaming分支，页面可以替交merge
+    git push origin master:streaming
+    退回到上一版本
+    git reset —hard  
+5. maven命令：
+    下载本地依赖:
+    mvn -DskipTests clean package install
+    下载缺失包：
+     mvn compile
+    下载编译项目
+    mvn clean && mvn install -U
+    生成lib目录，将相关包移进lib下
+    mvn dependency:copy-dependencies -DoutputDirectory=lib
+    tar包:
+    mvn assembly:assembly -DskipTests -P{p}
+    class包，产生class等，部署项目使用~
+    mvn -DskipTests -Pcdn_online clean package
+    查找依赖
+    mvn dependency:tree
+```
 
