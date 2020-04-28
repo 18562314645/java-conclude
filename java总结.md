@@ -2411,3 +2411,31 @@ localStorage和sessionStorage都具有相同的操作方法，例如setItem()、
     mvn dependency:tree
 ```
 
+**78.写出vue或react的生命周期函数**？
+
+```
+vue的生命周期主要有8个
+    beforeCreate
+    created
+    beforeMount
+    mounted
+    beforeUpdate
+    updated
+    beforeDestroy
+    destroyed
+    
+react生命周期主要有7个：
+挂载
+componentWillMount(过时)
+componentDidMount
+更新
+componentWillReceiveProps（过时）
+shouldComponentUpdate
+componentWillUpdate（过时）
+componentDidUpdate
+卸载
+componentWillUnmount
+
+```
+
+**79.版本回退**
