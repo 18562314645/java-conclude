@@ -2437,9 +2437,3 @@ componentDidUpdate
 componentWillUnmount
 
 ```
-
-
-2222
-=======
-1111
-
