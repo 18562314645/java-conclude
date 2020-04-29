@@ -2437,3 +2437,23 @@ componentDidUpdate
 componentWillUnmount
 
 ```
+79.springBoot和springCloud的区别？
+
+springBoot： Spring Boot就是整合了框架的框架，它让一切依赖都变得有序简单，你不用操心A.jar是什么版本，又依赖哪些版本的jar，它默认配置了很多框架的使用方式，就像 maven整合了所有的jar包，Spring Boot整合了所有的框架，第三方库的功能你拿着就能用。
+Spring Boot的核心思想就是约定大于配置，一切由内定的约束来自动完成。采用 Spring Boot可以大大的简化你的开发模式，节省大部分照搬照抄的成本，通过少量的代码就能创建一个独立的，它都有对应的组件支持。 
+
+springCloud: Spring Cloud是一套分布式服务治理的框架,既然它是一套服务治理的框架，那么它本身不会提供具体功能性的操作，更专注于服务之间的通讯、熔断、监控等。因此就需要很多的组件来支持一套功能。 
+
+springCloud包括：
+
+- Eureka，服务注册中心，特性有失效剔除、服务保护。
+- Dashboard，Hystrix仪表盘，监控集群模式和单点模式，其中集群模式需要收集器Turbine配合。
+-  Turbine是集群收集器，服务于Dashboard的。 
+- Zuul，API服务网关，功能有路由分发和过滤。
+- Config，分布式配置中心，支持本地仓库、SVN、Git、Jar包内配置等模式，
+- Ribbon，客户端负载均衡，特性有区域亲和、重试机制。
+- Hystrix，客户端容错保护，特性有服务降级、服务熔断、请求缓存、请求合并、依赖隔离。
+- Feign，声明式服务调用，本质上就是Ribbon+Hystrix
+- Stream，消息驱动，有Sink、Source、Processor三种通道，特性有订阅发布、消费组、消息分区。
+- Bus，消息总线，配合Config仓库修改的一种Stream实现，
+- Sleuth，分布式服务追踪，需要搞清楚TraceID和SpanID以及抽样，如何与ELK整合。
