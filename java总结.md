@@ -2467,7 +2467,7 @@ springCloud包括：
 
 - Eureka，服务注册中心，特性有失效剔除、服务保护。
 - Dashboard，Hystrix仪表盘，监控集群模式和单点模式，其中集群模式需要收集器Turbine配合。
--  Turbine是集群收集器，服务于Dashboard的。 
+- Turbine是集群收集器，服务于Dashboard的。 
 - Zuul，API服务网关，功能有路由分发和过滤。
 - Config，分布式配置中心，支持本地仓库、SVN、Git、Jar包内配置等模式，
 - Ribbon，客户端负载均衡，特性有区域亲和、重试机制。
@@ -2564,4 +2564,240 @@ redis是单线程模型，这种机制导致当有大量并发时，在redis内�
 **86.spring源码解析？**
 
 aop动态代理是发生在init创建对象时即获取context上下文时
+
+**87.mongodb相关**
+
+JSON格式：
+
+![](/assert/39.png)
+
+三个概念：
+
+数据库(database):是一个仓库，在仓库中可以存放集合
+
+ 集合(collection) ：集合类似于数组，在集合中可以存放文档
+
+文档(document)：文档数据库中最小的单位，我们存储和操作的内容都是文档
+
+在mongodb中数据库和集合会在第一次插入文档时创建
+
+文档的增删改查：
+
+```js
+//1.进入my_test数据库
+use my_test;
+
+//2.向数据库的user集合中插入一个文档 {username:"sunwukong"} 
+/*
+    db.collection.insert()
+        - 向集合中插入一个或多个文档
+    db.collection.insertOne()
+        - 向集合中插入一个文档，该方法中只能传递一个document对象
+    db.collection.insertMany()    
+        - 向集合中插入多个文档，该方法只能接受一个数组作为参数
+*/
+db.user.insert({username:"sunwukong"});
+
+//插入多个文档
+db.user.insert([
+    {username:"aaa"},
+    {username:"bbb"},
+    {username:"ccc"}
+]);
+
+
+
+/*
+    db.collection.find()
+        - 查询指定集合中所有复合条件的文档，如果不传参数，会返回集合中的所有文档
+        - 可以在find()添加一个对象作为查询条件
+        - find()返回的是一个数组
+    db.collection.findOne()
+        - 查询指定集合中符合条件的第一个文档
+        - findOne()返回的是一个具体的文档
+            
+*/ 
+//3.查询user集合中的文档
+db.user.find();
+db.user.findOne();
+db.user.find({username:"aaa",age:18});
+
+
+//4.向数据库的user集合中插入一个文档
+db.user.insertOne({username:"zhubajie"});
+      
+//5.查询数据库user集合中的文档
+db.user.find();
+
+//6.统计数据库user集合中的文档数量
+db.user.count();
+
+//7.查询数据库user集合中username为sunwukong的文档
+db.user.find({username:"sunwukong"});
+
+//8.向数据库user集合中的username为sunwukong的文档，添加一个address属性，属性值为huaguoshan
+/*
+    db.collection.update(查询条件,新的对象)
+        - 修改文档
+        - update()默认情况下会使用新的文档替换旧文档
+            如果不希望整个替换文档，则需要使用修改器
+        $set 用来向文档中添加一个属性    
+*/
+db.user.update({username:"sunwukong"},{address:"huaguoshan"});
+db.user.update({address:"huaguoshan"},{username:"sunwukong"});
+db.user.update({username:"sunwukong"},{$set:{address:"huaguoshan"}});
+db.user.find()
+
+
+//9.使用{username:"tangseng"} 替换 username 为 zhubajie的文档
+db.user.update({username:"zhubajie"},{username:"tangseng"});
+    
+//10.删除username为sunwukong的文档的address属性
+db.user.update({username:"sunwukong"},{$unset:{address:1}});
+
+use my_test
+db.user.find()
+//11.向username为sunwukong的文档中，添加一个hobby:{cities:["beijing","shanghai","shenzhen"] , movies:["sanguo","hero"]}
+/*
+    MongoDB的文档的属性值也可以是一个文档，如果一个文档的属性值还是文档，
+    那么我们这个文档叫做内嵌文档
+*/
+db.user.update({username:"sunwukong"},{$set:{hobby:{cities:["beijing","shanghai","shenzhen"] , movies:["sanguo","hero"]}}});
+db.user.find();
+//12.向username为tangseng的文档中，添加一个hobby:{movies:["A Chinese Odyssey","King of comedy"]}
+db.user.update({username:"tangseng"},{$set:{hobby:{movies:["A Chinese Odyssey","King of comedy"]}}});
+
+//13.查询喜欢电影hero的文档
+/*
+    要匹配内嵌文档的属性，需要通过.的方式来进行查询
+    如果去通过内嵌文档匹配文档，属性名必须加引号
+*/
+db.user.find({"hobby.movies":"hero"});
+
+//14.向tangseng中添加一个新的电影Interstellar
+/*
+    $push 可以用来向数组中添加一个元素
+    $addToSet 用来向数组中添加一个不存在的元素
+*/
+db.user.update({username:"tangseng"},{$addToSet:{"hobby.movies":"Interstellar"}});
+db.user.find()
+
+//15.删除喜欢beijing的用户
+/*
+    db.collection.remove()
+    - 如果remove()中传递一个空的对象作为参数，则会删除集合中的所有文档，慎用！
+    db.collection.deleteOne()
+    - 删除符合条件的第一个文档
+    db.collection.deleteMany()
+    - 删除符合条件的所有文档
+    db.collection.drop();
+    - 删除集合，如果数据库中只有一个集合，会将数据库一起删除
+    db.dropDatabase()
+    - 删除数据库    
+    
+    
+    
+    db.collection.updateOne()
+        - 修改一个
+    db.collection.updateMany()
+        - 修改多个
+    db.collection.replaceOne()
+        - 替换一个
+    db.collection.update()
+        - 修改(替换)一个或多个
+*/
+db.user.remove({"hobby.cities":"beijing"});
+db.user.remove({});
+
+//16.删除user集合
+show collections;
+show dbs;
+db.user.drop();
+use my_test
+
+db.user.insert({_id:"hello",name:"猪八戒"});
+
+/*
+    - 在向集合中插入文档时，MongoDB数据库会自动为文档添加一个_id属性，
+        属性值会由MongoDB调用ObjectId()来自动生成
+    - _id属性会作为文档的唯一标识   
+    - 也可以手动指定_id属性，如果手动指定了，则数据库不会再自动添加
+        手动指定的id也必须确保唯一 ，不建议自己指定
+*/
+db.user.find({_id:ObjectId("59ddc0ee1af0189789cf7e91")});
+
+ObjectId();
+
+
+//17.向numbers中插入20000条数据
+//7.2s
+for(var i=1 ; i<=20000 ; i++){
+    db.numbers.insert({num:i});
+}
+
+//创建一个数组，用来保存文档
+var arr = [];
+
+for(var i=1 ; i<=20000 ; i++){
+   arr.push({num:i});
+}
+
+db.numbers.insert(arr);
+
+db.numbers.drop()
+
+db.numbers.find();
+
+
+//18.查询numbers中num为500的文档
+/*
+    查询操作符 $eq 查询指定的字段是否等于某个值
+*/
+db.numbers.find({num:{$eq:500}});
+
+
+//19.查询numbers中num大于5000的文档
+//$gt 查询大于指定值的文档 $gte 查询大于或等于指定值的文档
+db.numbers.find({num:{$gt:5000}});
+
+
+//20.查询numbers中num小于30的文档
+db.numbers.find({num:{$lt:30}});
+
+//21.查询numbers中num大于40小于50的文档
+db.numbers.find({num:{$gt:40 , $lt:50}});
+
+//查询大于19000 或 小于40的
+db.numbers.find({num:{$gt:19000 , $lt:40}});
+db.numbers.find({$or:[{num:{$gt:19000}} , {num:{$lt:40}}]})
+
+//22.查询numbers中num大于19996的文档
+db.numbers.find({num:{$gt:19996}});
+
+//23.查看numbers集合中的前10条数据
+db.numbers.find({num:{$lte:10}});
+
+//limit() 用来限制显示数据的最大的条数
+db.numbers.find({}).limit(10);
+
+//24.查看numbers集合中的第11条到20条数据
+//skip()用于跳过指定数量的数据
+//在MongoDB中，会自动调整limit()和skip的位置
+db.numbers.find({}).limit(10).skip(10);
+
+//25.查看numbers集合中的第21条到30条数据
+db.numbers.find({}).limit(10).skip(20);
+
+/*
+    在MongoDB中通过limit() 和 skip()方法来完成分页
+    
+        第一页 limit(10).skip(0)
+        第二页 limit(10).skip(10)
+        ...
+        
+        limit(每页条数).skip(每页条数*(页码-1));
+    
+*/
+
+```
 
