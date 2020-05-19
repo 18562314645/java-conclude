@@ -8,7 +8,7 @@ java相关的博客：<https://blog.kuangstudy.com/>
 
  **1. java的跨平台原理**
 
-​	应为java有自己的虚拟机在不同平台上运行java虚拟机使得接口统一，部通平台上jvm不同，java通过不同版本及不同位数的jvm来屏蔽不同的系统间的指令集的差异，对外提供统一的javaapi接口，
+​	应为java有自己的虚拟机在不同平台上运行java虚拟机使得接口统一，不同平台上jvm不同，java通过不同版本及不同位数的jvm来屏蔽不同的系统间的指令集的差异，对外提供统一的javaapi接口，
 
 **2.java基础知识**
 
@@ -379,6 +379,68 @@ SELECT t_id id, t_name name FROM teacher WHERE t_id=#{id}
     </resultMap>
 ```
 
+mybatis中查询部门树之collection得嵌套子查询
+
+```sql
+ <select id="getAllDepartmentsByParentId" resultMap="DepartmentWithChildren">
+    select * from department where parentId=#{pid};
+  </select>
+ 
+ <resultMap id="BaseResultMap" type="org.javaboy.vhr.model.Department">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="parentId" property="parentId" jdbcType="INTEGER"/>
+        <result column="depPath" property="depPath" jdbcType="VARCHAR"/>
+        <result column="enabled" property="enabled" jdbcType="BIT"/>
+        <result column="isParent" property="isParent" jdbcType="BIT"/>
+    </resultMap>
+    
+    
+<resultMap id="DepartmentWithChildren" type="org.javaboy.vhr.model.Department"   		extends="BaseResultMap">
+        <collection property="children" ofType="org.javaboy.vhr.model.Department"
+		select="org.javaboy.vhr.mapper.DepartmentMapper.getAllDepartmentsByParentId"     		 column="id"/>
+ </resultMap>
+此处select表示拿着查询到得id为条件再次执行select * from department where parentId=#{pid};语句
+
+实体类中存放list集合
+private List<Department> children = new ArrayList<>();
+
+```
+
+mybatis中查询菜单用法
+
+```sql
+ <select id="getAllMenus" resultMap="MenuWithChildren">
+    select m1.`id` as id1,m1.`name` as name1,m2.`id` as id2,m2.`name` as name2,m3.`id` as id3,m3.`name` as name3 from menu m1,menu m2,menu m3 where m1.`id`=m2.`parentId` and m2.`id`=m3.`parentId` and m3.`enabled`=true order by m1.`id`,m2.`id`,m3.`id`
+  </select>
+  
+  <resultMap id="MenuWithChildren" type="org.javaboy.vhr.model.Menu" extends="BaseResultMap">
+    <id column="id1" property="id"/>
+    <result column="name1" property="name"/>
+    <collection property="children" ofType="org.javaboy.vhr.model.Menu">
+      <id column="id2" property="id"/>
+      <result column="name2" property="name"/>
+      <collection property="children" ofType="org.javaboy.vhr.model.Menu">
+        <id column="id3" property="id"/>
+        <result column="name3" property="name"/>
+      </collection>
+    </collection>
+  </resultMap>
+  
+  实体类：
+  private Integer id;
+    private String url;
+    private String path;
+    private String component;
+    private String name;
+    private String iconCls;
+    private Meta meta;
+    private Integer parentId;
+    private Boolean enabled;
+    private List<Menu> children;
+    private List<Role> roles;
+```
+
 **39.linux系统常用服务类相关命令？**
 
 ​	1.service network status 查看网络状态
@@ -704,7 +766,7 @@ spring整合shiro
 
 shiro的三个核心组件：**subject（主题）**    **SecurityManger（安全管理器）**    **Relam(数据源)**。
 
-**52.springsecurity？**
+**52.springsecurity（利用aop思想）？**
 
 ​	spring security 的核心功能主要包括：认证 （你是谁） 授权 （你能干什么） 	攻击防护 （防止伪造身份）
 
@@ -2799,5 +2861,198 @@ db.numbers.find({}).limit(10).skip(20);
     
 */
 
+```
+
+**88.使用aop记录操作日志**
+
+ 思路总结：首先在需要做日志记录的方法中添加一个自定义注解，再去实现一个日志AOP类，AOP类把自定义注解设置为切点，所以当系统执行某一个添加了自定义注解的方法时，AOP会自动获取该方法名称以及用户信息实现日志记录。
+
+1.添加springboot整合aop启动器
+
+```
+<dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-aop</artifactId>
+</dependency>
+```
+
+2.编写自定义注解类
+
+```java
+/**
+ * 自定义注解类  定义controller方法的中文含义
+ * @Target({METHOD,TYPE}) 表示这个注解可以用用在类/接口上，还可以用在方法上
+ * @Retention(RetentionPolicy.RUNTIME) 表示这是一个运行时注解，即运行起来之后，才获取注解中的相关信息，而不像基本注解如@Override 那种不用运行，在编译时eclipse就可以进行相关工作的编译时注解。
+ * @Inherited 表示这个注解可以被子类继承
+ * @Documented 表示当执行javadoc的时候，本注解会生成相关文档
+ */
+
+@Target({METHOD, TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@Documented
+public @interface Operation {
+    String value() default "";
+}
+```
+
+3。可参考得工具类
+
+```java
+ /**
+	 * 获取用户真实的ip地址
+	 * @param request
+	 * @return
+	 */
+public class IpAdrressUtil {
+	
+	public static String getIpAdrress(HttpServletRequest request) {
+		 	String ip = null;
+
+		    //X-Forwarded-For：Squid 服务代理
+		    String ipAddresses = request.getHeader("X-Forwarded-For");
+		    String unknown = "unknown";
+		    if (ipAddresses == null || ipAddresses.length() == 0 || unknown.equalsIgnoreCase(ipAddresses)) {
+		        //Proxy-Client-IP：apache 服务代理
+		        ipAddresses = request.getHeader("Proxy-Client-IP");
+		    }
+
+		    if (ipAddresses == null || ipAddresses.length() == 0 || unknown.equalsIgnoreCase(ipAddresses)) {
+		        //WL-Proxy-Client-IP：weblogic 服务代理
+		        ipAddresses = request.getHeader("WL-Proxy-Client-IP");
+		    }
+
+		    if (ipAddresses == null || ipAddresses.length() == 0 || unknown.equalsIgnoreCase(ipAddresses)) {
+		        //HTTP_CLIENT_IP：有些代理服务器
+		        ipAddresses = request.getHeader("HTTP_CLIENT_IP");
+		    }
+
+		    if (ipAddresses == null || ipAddresses.length() == 0 || unknown.equalsIgnoreCase(ipAddresses)) {
+		        //X-Real-IP：nginx服务代理
+		        ipAddresses = request.getHeader("X-Real-IP");
+		    }
+
+		    //有些网络通过多层代理，那么获取到的ip就会有多个，一般都是通过逗号（,）分割开来，并且第一个ip为客户端的真实IP
+		    if (ipAddresses != null && ipAddresses.length() != 0) {
+		        ip = ipAddresses.split(",")[0];
+		    }
+
+		    //还是不能获取到，最后再通过request.getRemoteAddr();获取
+		    if (ip == null || ip.length() == 0 || unknown.equalsIgnoreCase(ipAddresses)) {
+		        ip = request.getRemoteAddr();
+		    }
+		    return ip;
+	  }
+	
+	
+}
+
+//实现json工具类
+public class JacksonUtil {
+
+    private final static ObjectMapper objectMapper = new ObjectMapper();
+
+    private JacksonUtil() {
+
+    }
+
+    public static ObjectMapper getInstance() {
+        return objectMapper;
+    }
+
+    /**
+     * javaBean、列表数组转换为json字符串
+     */
+    public static String obj2json(Object obj) throws Exception {
+        return objectMapper.writeValueAsString(obj);
+    }
+
+    /**
+     * json 转JavaBean
+     */
+
+    public static <T> T json2pojo(String jsonString, Class<T> clazz) throws Exception {
+        objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        return objectMapper.readValue(jsonString, clazz);
+    }
+
+    /**
+     * json字符串转换为map
+     */
+    public static <T> Map<String, Object> json2map(String jsonString) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        return mapper.readValue(jsonString, Map.class);
+    }
+}
+```
+
+4.实现日志AOP类
+
+```java
+/**
+ * 系统日志，切面处理类
+ */
+@Aspect
+@Component
+public class SysLogAspect {
+
+    @Autowired
+    private SysLogService sysLogService;
+
+    //定义切点@pointcut
+    //在注解的地方切入代码
+    @Pointcut("@annotation(org.javaboy.vhr.logaop.Operation)")
+    public void LogPointCut(){
+
+    }
+
+    //切面，配置通知
+    @AfterReturning("LogPointCut()")
+    public void saveSysLog(JoinPoint joinPoint){
+        //保存日志
+        OpLog opLog=new OpLog();
+
+        //从切面织入点通过反射获取织入点方法
+        MethodSignature signature=(MethodSignature)joinPoint.getSignature();
+
+        //获取织入点的方法
+        Method method = signature.getMethod();
+
+        Operation operation = method.getAnnotation(Operation.class);
+
+        //将操作内容写入到oplog中
+        if(operation!=null){
+            String value = operation.value();
+            opLog.setOperate(value);
+        }
+
+        //将操作时间写到oplog中
+        opLog.setAdddate(new Date());
+
+        //获取操作人
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Hr hr = (Hr) authentication.getPrincipal();
+        opLog.setHrid(hr.getId());
+
+        //保存日志
+        sysLogService.saveSysLog(opLog);
+    }
+}
+
+
+```
+
+5.在对应方法添加自定义注解实现日志
+
+```java
+ @PostMapping("/")
+    @Operation("添加职称信息")
+    public RespBean addJobLevel(@RequestBody JobLevel jobLevel) {
+        if (jobLevelService.addJobLevel(jobLevel) == 1) {
+            return RespBean.ok("添加成功!");
+        }
+        return RespBean.error("添加失败!");
+    }
 ```
 
