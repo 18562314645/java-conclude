@@ -3182,3 +3182,73 @@ ES相关
 
 Redis解决缓存一致性问题？
 
+ TCP/IP传输协议是严格来说是一个四层的体系结构，应用层、传输层、网络层和数据链路层都包含其中。 
+
+redis的数据类型： Redis支持五种数据类型：string（字符串），hash（哈希），list（列表），set（集合）及zset(sorted set：有序集合)。” 
+
+ 在学习网络课程的时候,老师会讲iso七层模型，有应用层 表示层 会话层 传输层 网络层 数据链路层 物理层,其中http就属于应用层,tcp与udp是属于传输层 
+
+93.springBoot中常用的注解有哪些？@compents和@bean的区别？mybatis中嵌套查询和嵌套结果有什么区别？有一个字符串，需要统计每一个字符出现的次数，怎么去做？string里面常用的方法有哪些？servlet的生命周期?怎么实现一个二级联动？一张表中有很多数据，他的主键是自增的，怎么拿到最后一个数据？mysql中做分页怎么实现，传递几个参数，意义，怎么解决当分页的偏移量太大时，效率低，什么样的方式可以让这个分页出来的数据更快一些？分表根据什么分？jdk1.8新特性？http和https的区别？tcp与udp的区别？http常见的问题？springBootApplication的运行机制？（就是springboot根据配置文件,自动装配所属以来的类，再使用动态代理的方式注入到spring容器中）mybatis二级缓存怎么开启？springcloud组件,ribbon负载均衡的算法有哪些？熔断器默认的阈值线程数是多少？mysql索引？（一般频繁被修改的字段是不会建索引的）JPA建模思想？
+
+```XML
+1.springBoot中常用的注解有哪些？
+@Service: 注解在类上，表示这是一个业务层bean
+@Controller：注解在类上，表示这是一个控制层bean
+@Repository: 注解在类上，表示这是一个数据访问层bean
+@Component： 注解在类上，表示通用bean ，value不写默认就是类名首字母小写
+@Autowired：按类型注入.默认属性required= true;当不能确定 Spring 容器中一定拥有某个类的Bean 时， 可以在需要自动注入该类 Bean 的地方可以使用 @Autowired(required = false)， 这等于告诉Spring：在找不到匹配Bean时也不抛出BeanCreationException 异常。@Autowired 和 @Qualifier 结合使用时，自动注入的策略就从 byType 转变byName 了。@Autowired可以对成员变量、方法以及构造函数进行注释，而 @Qualifier 的标注对象是成员变量、方法入参、构造函数入参。正是由于注释对象的不同，所以 Spring 不将 @Autowired 和 @Qualifier 统一成一个注释类。
+@Resource： 按名称装配
+@Configuration：注解在类上，表示这是一个IOC容器，相当于spring的配置文件，java配置的方式。 IOC容器的配置类一般与 @Bean 注解配合使用，用 @Configuration 注解类等价与 XML 中配置 beans，用@Bean 注解方法等价于 XML 中配置 bean。
+    
+2.@compents和@bean的区别？
+两个注解的作用：
+@Component注解表明一个类会作为组件类，并告知Spring要为这个类创建bean。
+@Bean注解告诉Spring这个方法将会返回一个对象，这个对象要注册为Spring应用上下文中的bean。通常方法体中包含了最终产生bean实例的逻辑。
+@Component（@Controller、@Service、@Repository）通常是通过类路径扫描来自动侦测以及自动装配到Spring容器中而@Bean注解通常是我们在标有该注解的方法中定义产生这个bean的逻辑。
+而@Bean的用途则更加灵活当我们引用第三方库中的类需要装配到Spring容器时，则只能通过@Bean来实现
+
+3.mybatis中嵌套查询和嵌套结果有什么区别？
+嵌套查询的弊端：即嵌套查询的N+1问题
+尽管嵌套查询大量的简化了存在关联关系的查询，但它的弊端也比较明显：即所谓的N+1问题。关联的嵌套查询显示得到一个结果集，然后根据这个结果集的每一条记录进行关联查询。
+现在假设嵌套查询就一个（即resultMap 内部就一个association标签），现查询的结果集返回条数为N，那么关联查询语句将会被执行N次，加上自身返回结果集查询1次，共需要访问数据库N+1次。如果N比较大的话，这样的数据库访问消耗是非常大的！所以使用这种嵌套语句查询的使用者一定要考虑慎重考虑，确保N值不会很大。
+
+嵌套结果查询：
+嵌套语句的查询会导致数据库访问次数不定，进而有可能影响到性能。Mybatis还支持一种嵌套结果的查询：即对于一对多，多对多，多对一的情况的查询，Mybatis通过联合查询，将结果从数据库内一次性查出来，然后根据其一对多，多对一，多对多的关系和ResultMap中的配置，进行结果的转换，构建需要的对象。
+ 
+4.有一个字符串，需要统计每一个字符出现的次数，怎么去做？
+将字符串转成字符数组，新建map集合，key放字符，v放个数
+
+5.string里面常用的方法有哪些？
+String 类的常用方法： 
+
+equals：字符串是否相同  	equalsIgnoreCase：忽略大小写后字符串是否相同
+compareTo：根据字符串中每个字符的Unicode编码进行比较
+compareToIgnoreCase：根据字符串中每个字符的Unicode编码进行忽略大小写比较
+indexOf：目标字符或字符串在源字符串中位置下标
+lastIndexOf：目标字符或字符串在源字符串中最后一次出现的位置下标
+valueOf：其他类型转字符串
+charAt：获取指定下标位置的字符
+codePointAt：指定下标的字符的Unicode编码
+concat：追加字符串到当前字符串
+isEmpty：字符串长度是否为0
+contains：是否包含目标字符串
+startsWith：是否以目标字符串开头
+endsWith：是否以目标字符串结束
+format：格式化字符串
+getBytes：获取字符串的字节数组
+getChars：获取字符串的指定长度字符数组
+toCharArray：获取字符串的字符数组
+join：以某字符串，连接某字符串数组
+length：字符串字符数
+matches：字符串是否匹配正则表达式
+replace：字符串替换
+replaceAll：带正则字符串替换
+replaceFirst：替换第一个出现的目标字符串
+split：以某正则表达式分割字符串
+substring：截取字符串
+toLowerCase：字符串转小写
+toUpperCase：字符串转大写
+trim：去字符串首尾空格
+
+```
+
