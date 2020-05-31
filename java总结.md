@@ -3056,7 +3056,7 @@ public class SysLogAspect {
     }
 ```
 
-1.spring bean的注入过程  流处理stream api 流式处理的性能对比forearch或基本的for循环性能效率上进行优化吗
+1.spring bean的注入过程  流处理stream api 流式处理的性能对比forearch或基本的for循环性能效率上进行优化吗？( 如果在循环体中有复杂的业务、调用远程接口或数据库就用stream，因为stream是多线程方式并行执行，但是其调用线程池必然会消耗性能，所以简单的操作固然还是for循环效率高) 
 
 2.Synchronized和lock锁它底层实现的原理，cas简单介绍一下（比较并交换）线上cpu100%排查问题的思路，linux查看进程的命令  mysql怎么优化他的查询，一张表最多建16个索引，redis集群持久化？redis和memorycach区别？缓存击穿和缓存穿透？spring优点；dubbo的调用链路？服务暴漏的过程？常用的设计模式？保证幂等？怎么解决rpc调用超时产生的重试机制，保证业务的幂等性问题
 
@@ -3188,9 +3188,9 @@ redis的数据类型： Redis支持五种数据类型：string（字符串），
 
  在学习网络课程的时候,老师会讲iso七层模型，有应用层 表示层 会话层 传输层 网络层 数据链路层 物理层,其中http就属于应用层,tcp与udp是属于传输层 
 
-93.springBoot中常用的注解有哪些？@compents和@bean的区别？mybatis中嵌套查询和嵌套结果有什么区别？有一个字符串，需要统计每一个字符出现的次数，怎么去做？string里面常用的方法有哪些？servlet的生命周期?怎么实现一个二级联动？一张表中有很多数据，他的主键是自增的，怎么拿到最后一个数据？mysql中做分页怎么实现，传递几个参数，意义，怎么解决当分页的偏移量太大时，效率低，什么样的方式可以让这个分页出来的数据更快一些？分表根据什么分？jdk1.8新特性？http和https的区别？tcp与udp的区别？http常见的问题？springBootApplication的运行机制？（就是springboot根据配置文件,自动装配所属以来的类，再使用动态代理的方式注入到spring容器中）mybatis二级缓存怎么开启？springcloud组件,ribbon负载均衡的算法有哪些？熔断器默认的阈值线程数是多少？mysql索引？（一般频繁被修改的字段是不会建索引的）JPA建模思想？
+93.springBoot中常用的注解有哪些？@compents和@bean的区别？mybatis中嵌套查询和嵌套结果有什么区别？有一个字符串，需要统计每一个字符出现的次数，怎么去做？string里面常用的方法有哪些？servlet的生命周期?怎么实现一个二级联动？一张表中有很多数据，他的主键是自增的，怎么拿到最后一个数据？（可以使用max()函数拿到最大的Id）mysql中做分页怎么实现，传递几个参数，意义，怎么解决当分页的偏移量太大时，效率低，什么样的方式可以让这个分页出来的数据更快一些？分表根据什么分？jdk1.8新特性？http和https的区别？tcp与udp的区别？http常见的问题？springBootApplication的运行机制？（就是springboot根据配置文件,自动装配所属以来的类，再使用动态代理的方式注入到spring容器中）mybatis二级缓存怎么开启？springcloud组件,ribbon负载均衡的算法有哪些？熔断器默认的阈值线程数是多少？mysql索引？（一般频繁被修改的字段是不会建索引的）JPA建模思想？
 
-```XML
+```java
 1.springBoot中常用的注解有哪些？
 @Service: 注解在类上，表示这是一个业务层bean
 @Controller：注解在类上，表示这是一个控制层bean
@@ -3250,5 +3250,220 @@ toLowerCase：字符串转小写
 toUpperCase：字符串转大写
 trim：去字符串首尾空格
 
+6.servlet的生命周期?
+Servlet的生命周期通过javax.servlet.Servlet接口中的init()、service()和destroy()方法来表示。
+init()方法
+在Servlet实例化之后，容器将调用Servlet的init()方法初始化这个对象。初始化的目的是为了让Servlet对象在处理客户端请求前完成一些初始化的工作，如建立数据库的连接，获取配置信息等。
+service()方法
+对于每一个Servlet实例，init()方法只被调用一次。在初始化期间，Servlet实例可以使用容器为它准备的service()方法为Servlet的核心方法，客户端的业务逻辑应该在该方法内执行，典型的服务方法的开发流程为：
+解析客户端请求-〉执行业务逻辑-〉输出响应页面到客户端
+destroy()方法
+当容器检测到一个Servlet实例应该从服务中被移除的时候，容器就会调用实例的destroy()方法，以便让该实例可以释放它所使用的资源，保存数据到持久存储设备中。当需要释放内存或者容器关闭时，容器就会调用Servlet实例的destroy()方法。在destroy()方法调用之后，容器会释放这个Servlet实例，该实例随后会被Java的垃圾收集器所回收
+
+7.怎么解决当分页的偏移量太大时，效率低，什么样的方式可以让这个分页出来的数据更快一些？
+MySQL的limit工作原理就是先读取前面n条记录，然后抛弃前n条，读后面m条想要的，所以n越大，偏移量越大，性能就越差。
+    解决方法：
+    1、尽量给出查询的大致范围
+    SELECT c1,c2,cn... FROM table WHERE id>=20000 LIMIT 10;
+    2、子查询法
+    SELECT c1,c2,cn... FROM table WHERE id>=
+    (
+    SELECT id FROM table LIMIT 20000,1
+    )
+    LIMIT 10;
+    3、高性能MySQL一书中提到的只读索引方法
+    SELECT c1, c2, cn .. .FROM member INNER JOIN (SELECT member_id FROM member ORDER BY 	last_active LIMIT 50, 5) USING (member_id)
+    分别在于，优化前的SQL需要更多I/O浪费，因为先读索引，再读数据，然后抛弃无需的行。而优化后的SQL(子查询那	条)只读索引(Cover index)就可以了，然后通过member_id读取需要的列。
+8.分表根据什么分？
+水平切分后同一张表会出现在多个数据库/表中，每个库/表的内容不同。几种典型的数据分片规则为：
+1、根据数值范围:按照时间区间或ID区间来切分。例如：按日期将不同月甚至是日的数据分散到不同的库中；将userId为1~9999的记录分到第一个库，10000~20000的分到第二个库，以此类推。某种意义上，某些系统中使用的"冷热数据分
+离"，将一些使用较少的历史数据迁移到其他库中，业务功能上只提供热点数据的查询，也是类似的实践.
+
+2、根据数值取模
+一般采用hash取模mod的切分方式，例如：将 Customer 表根据 cusno 字段切分到4个库中，余数为0的放到第一个库，余数为1的放到第二个库，以此类推。这样同一个用户的数据会分散到同一个库中，如果查询条件带有cusno字段，则可明确定位到相应库去查询。
+优点：数据分片相对比较均匀，不容易出现热点和并发访问的瓶颈
+缺点：后期分片集群扩容时，需要迁移旧的数据（使用一致性hash算法能较好的避免这个问题）
+
+9.分库分表带来的问题？
+分库分表能有效地缓解单机单库带来的性能瓶颈压力，突破网络IO,硬件资源，连接数的瓶颈，但是也引来了一些问题：
+9.1事务一致性问题解决：
+a.可以采用分布式事务：分布式事务能最大限度保证了数据库操作的原子性。但在提交事务时需要协调多个节点，推后了提交事务的时间点，延长了事务的执行时间。导致事务在访问共享资源时发生冲突或死锁的概率增高。随着数据库节点的增多，这种趋势会越来越严重，从而成为系统在数据库层面上水平扩展的枷锁。				
+b.最终一致性：对于那些性能要求很高，但对一致性要求不高的系统，往往不苛求系统的实时一致性，只要在允许的时间段内达到最终一致性即可，可采用事务补偿的方式。与事务在执行中发生错误后立即回滚的方式不同，事务补偿是一种事后检查补救的措施，一些常见的实现方法有：对数据进行对账检查，基于日志进行对比，定期同标准数据来源进行同步等等。事务补偿还要结合业务系统来考虑。
+
+9.2跨节点关联查询 join 问题解决方案：
+a.全局表：全局表，也可看做是"数据字典表"，就是系统中所有模块都可能依赖的一些表，为了避免跨库join查询，可以将这类表在每个数据库中都保存一份。这些数据通常很少会进行修改，所以也不担心一致性的问题。
+b.字段冗余：一种典型的反范式设计，利用空间换时间，为了性能而避免join查询。例如：订单表保存userId时候，也将userName冗余保存一份，这样查询订单详情时就不需要再去查询"买家user表"了。但这种方法适用场景也有限，比较适用于依赖字段比较少的情况。而冗余字段的数据一致性也较难保证，就像上面订单表的例子，买家修改了userName后，是否需要在历史订单中同步更新呢？这也要结合实际业务场景进行考虑。
+c.数据组装：在系统层面，分两次查询，第一次查询的结果集中找出关联数据id，然后根据id发起第二次请求得到关联数据。最后将获得到的数据进行字段拼装。
+
+9.3跨节点分页、排序、函数问题：
+跨节点多库进行查询时，会出现limit分页、order by排序等问题。分页需要按照指定字段进行排序，当排序字段就是分片字段时，通过分片规则就比较容易定位到指定的分片；当排序字段非分片字段时，就变得比较复杂了。需要先在不同的分片节点中将数据进行排序并返回，然后将不同分片返回的结果集进行汇总和再次排序，最终返回给用户。在使用Max、Min、Sum、Count之类的函数进行计算的时候，也需要先在每个分片上执行相应的函数，然后将各个分片的结果集进行汇总和再次计算，最终将结果返回。
+9.4 全局主键避重问题
+
+10.jdk1.8新特性？
+10.1 Lambda表达式：lambda表达式本质上是一段匿名内部类，也可以是一段可以传递的代码
+@Test
+public void test4(){
+      List<Product> products = filterProductByPredicate(proList, (p) -> p.getPrice() < 8000);
+      for (Product pro : products){
+          System.out.println(pro);
+      }
+  }
+10.2 Stream API
+stream的创建：
+    // 1，校验通过Collection 系列集合提供的stream()或者paralleStream()
+    List<String> list = new ArrayList<>();
+    Strean<String> stream1 = list.stream();
+
+    // 2.通过Arrays的静态方法stream()获取数组流
+    String[] str = new String[10];
+    Stream<String> stream2 = Arrays.stream(str);
+
+    // 3.通过Stream类中的静态方法of
+    Stream<String> stream3 = Stream.of("aa","bb","cc");
+
+    // 4.创建无限流
+    // 迭代
+    Stream<Integer> stream4 = Stream.iterate(0,(x) -> x+2);
+
+    //生成
+    Stream.generate(() ->Math.random());
+
+Stream的中间操作:
+/**
+   * 筛选 过滤  去重
+   */
+  emps.stream()
+          .filter(e -> e.getAge() > 10)
+          .limit(4)
+          .skip(4)
+          // 需要流中的元素重写hashCode和equals方法
+          .distinct()
+          .forEach(System.out::println);
+
+
+  /**
+   *  生成新的流 通过map映射
+   */
+  emps.stream()
+          .map((e) -> e.getAge())
+          .forEach(System.out::println);
+
+
+  /**
+   *  自然排序  定制排序
+   */
+  emps.stream()
+          .sorted((e1 ,e2) -> {
+              if (e1.getAge().equals(e2.getAge())){
+                  return e1.getName().compareTo(e2.getName());
+              } else{
+                  return e1.getAge().compareTo(e2.getAge());
+              }
+          })
+          .forEach(System.out::println);
+Stream的终止操作：
+    /**
+         *      查找和匹配
+         *          allMatch-检查是否匹配所有元素
+         *          anyMatch-检查是否至少匹配一个元素
+         *          noneMatch-检查是否没有匹配所有元素
+         *          findFirst-返回第一个元素
+         *          findAny-返回当前流中的任意元素
+         *          count-返回流中元素的总个数
+         *          max-返回流中最大值
+         *          min-返回流中最小值
+         */
+
+        /**
+         *  检查是否匹配元素
+         */
+        boolean b1 = emps.stream()
+                .allMatch((e) -> e.getStatus().equals(Employee.Status.BUSY));
+        System.out.println(b1);
+
+        boolean b2 = emps.stream()
+                .anyMatch((e) -> e.getStatus().equals(Employee.Status.BUSY));
+        System.out.println(b2);
+
+        boolean b3 = emps.stream()
+                .noneMatch((e) -> e.getStatus().equals(Employee.Status.BUSY));
+        System.out.println(b3);
+
+        Optional<Employee> opt = emps.stream()
+                .findFirst();
+        System.out.println(opt.get());
+
+        // 并行流
+        Optional<Employee> opt2 = emps.parallelStream()
+                .findAny();
+        System.out.println(opt2.get());
+
+        long count = emps.stream()
+                .count();
+        System.out.println(count);
+
+        Optional<Employee> max = emps.stream()
+                .max((e1, e2) -> Double.compare(e1.getSalary(), e2.getSalary()));
+        System.out.println(max.get());
+
+        Optional<Employee> min = emps.stream()
+                .min((e1, e2) -> Double.compare(e1.getSalary(), e2.getSalary()));
+        System.out.println(min.get());
+还有功能比较强大的两个终止操作 reduce和collect
+    reduce操作： reduce:(T identity,BinaryOperator)/reduce(BinaryOperator)-可以将流中元素反复结合起来，得到一个值
+     /**
+         *  reduce ：规约操作
+         */
+        List<Integer> list = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
+        Integer count2 = list.stream()
+                .reduce(0, (x, y) -> x + y);
+        System.out.println(count2);
+
+        Optional<Double> sum = emps.stream()
+                .map(Employee::getSalary)
+                .reduce(Double::sum);
+        System.out.println(sum);
+collect操作：Collect-将流转换为其他形式，接收一个Collection接口的实现，用于给Stream中元素做汇总的方法
+            /**
+         *  collect：收集操作
+         */
+
+        List<Integer> ageList = emps.stream()
+                .map(Employee::getAge)
+                .collect(Collectors.toList());
+        ageList.stream().forEach(System.out::println);
+
+11.http和https的区别？
+    1、https协议需要到CA  （Certificate Authority，证书颁发机构）申请证书，一般免费证书较少，因而需要       一定费用。(原来网易官网是http，而网易邮箱是https。)
+    2、http是超文本传输协议，信息是明文传输，https则是具有安全性的ssl加密传输协议。
+    3、http和https使用的是完全不同的连接方式，用的端口也不一样，前者是80，后者是443。
+    4、http的连接很简单，是无状态的。Https协议是由SSL+Http协议构建的可进行加密传输、身份认证的网络协议，		比http协议安全。(无状态的意思是其数据包的发送、传输和接收都是相互独立的。无连接的意思是指通信双方都不长	 久的维持对方的任何信息。)
+12.http,tcp ,udp关系？
+    iso七层模型，有应用层 表示层 会话层 传输层 网络层 数据链路层 物理层,其中http就属于应用层,tcp与udp是属于传输层
+12.1 http和tcp的区别：
+    （1）层次不同,http属于应用层，tcp属于传输层
+12.2 http和tcp的联系：
+    （1）http是基于tcp，就相当于生活中的吃饭时候你都会用到碗，这个碗就是tcp，吃饭这件事情就相当于http，因为我们http发送数据之前，会先进行tcp三次握手，记住这时候只是发送一些状态码的确认等，并没有对http的数据进行发送。
+    （2）http长连接和短连接，其实就是tcp长连接与短连接，在HTTP/1.0中默认使用短连接。也就是说，客户端和服务器每进行一次HTTP操作，就建立一次连接，请求结束就中断连接，HTTP1.1就使用长连接，
+    用长连接的HTTP协议，会在响应头加入这行代码：
+    Connection:keep-alive
+    使用长连接每次打开一个网页除了第一次需要三次握手连接，接下来请求服务器就不用再握手了，就一直使用这个连接，这个keep-alive不会永久保持，这个可以在服务器端设置
+12.3 tcp和udp的区别：
+  （1）tcp是面向连接的，udp不是面向连接的
+13.ribbon负载均衡的算法有哪些？
+  RoundRobinRule： 默认轮询的方式		RandomRule： 随机方式  
+  WeightedResponseTimeRule： 根据响应时间来分配权重的方式，响应的越快，分配的值越大。
+  BestAvailableRule： 选择并发量最小的方式
+  RetryRule： 在一个配置时间段内当选择server不成功，则一直尝试使用subRule的方式选择一个可用的server
+  ZoneAvoidanceRule： 根据性能和可用性来选择。
+  其他负载均衡算法
+  LeastActiveLoadBalance：最小活跃数负载均衡算法
+  ConsistentHashLoadBalance：一致性hash算法
+14.Hystrix  熔断机制
+   Hystrix Command请求后端服务失败数量超过一定比例(默认50%)且10秒内超过20个请求, 断路器会切换到开路状态(Open). 这时所有请求会直接失败而不会发送到后端服务. 断路器保持在开路状态一段时间后(默认5秒，每隔5s允许一个请求通过), 自动切换到半开路状态(HALF-OPEN). 这时会判断下一次请求的返回情况, 如果请求成功（请求都是健康的（RT<250ms））, 断路器切回闭路状态(CLOSED), 否则重新切换到开路状态(OPEN). Hystrix的断路器就像我们家庭电路中的保险丝, 一旦后端服务不可用, 断路器会直接切断请求链, 避免发送大量无效请求影响系统吞吐量, 并且断路器有自我检测并恢复的能力.
+熔断针对方法级别，A服务调用B服务的B1接口熔断，此时A服务依旧能调用B服务的B2接口。虽不直接影响调用B2接口，但由于熔断被触发，必然请求频率及错误比例会较高，这将导致单实例性能受到影响，从而间接影响A服务调用B服务的B2接口，表现通常为超时。
+Note：测试发现，服务抛出的异常也会引发熔断。
+HystrixBadRequestException异常将不会触发熔断。
+ 熔断器默认的阈值线程数是多少?10个
 ```
 
