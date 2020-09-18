@@ -12,7 +12,7 @@ java相关的博客：<https://blog.kuangstudy.com/>
 
 ##### **2.java基础知识**
 
-​      java中有8中数据类型 int 8位4个字节  boolean 1 位   char  2字节  byte 1字节  short 2字节  long  8字节  float 4字节  double 8字节
+​      java中有8中数据类型 int 32位4个字节  boolean 1 位   char  2字节  byte 1字节  short 2字节  long  8字节  float 4字节  double 8字节
 
 ##### **3.面向对象的特征有哪些方面**
 
@@ -128,6 +128,8 @@ public class Singleton {
 ​	工厂模式：springIOC就是使用了工厂模式，对象的创建交给一个工厂去创建
 
 ​	代理模式：SpringAOP就是使用的动态代理
+
+​	使用观者模式之后，发一个登录成功的消息，在监听者中处理不同的逻辑操作。简化了代码，可维护性，可			扩展性得到了提高。
 
 ​	包装模式
 
@@ -479,6 +481,10 @@ mybatis中查询菜单用法
 ​	c.在仓库上做对应的操作（提交暂存区，提交本地仓库，提交线上仓库，拉取线上仓库）
 
 ​		提交到线上仓库的指令：git push 在首次往线上仓库提交时出现403致命错误，原因是不是谁都能提交的必须鉴权，需要修改“./git/config”文件内容
+
+```
+http://yourname:password@git.oschina.net/name/project.git
+```
 
 ​	d.拉取线上最新版本 git pull  上班时要经常拉取
 
@@ -1278,7 +1284,7 @@ export default {
 </style>
 ```
 
-13.参数传递及接收
+13.参数传递及接收 
 
 ​	a.前端传参数
 
@@ -1992,7 +1998,25 @@ Redis 的内存占用会越来越高。Redis 为了限制最大使用内存，�
 - **volatile-random：**当内存超出 maxmemory，在设置了过期时间 key 的字典中，随机移除某个key。
 - **volatile-ttl：**当内存超出 maxmemory，在设置了过期时间 key 的字典中，优先移除 ttl 小的。
 
-**63.消息队列中如何保证消息的顺序性**
+**63.消息队列中如何保证消息的顺序性**（解耦，异步，削峰）
+
+**使用MQ可能遇到的问题**：1.如何保证高可用	2.如何保证数据不丢失（生产者到队列过程confirm，队列中持久化，消费后ack）
+
+3，消息重复消费，幂等性
+
+![](/assert/53.png)
+
+4.如何保证消息的顺序性
+
+
+
+rabbitMQ的高可用：
+
+rabbitMQ不是分布式的，kafa是分布式的。项目中MQ的高可用起着至关重要的作用。
+
+1.rabbitMQ有普通集群模式：就是每个节点间有queue的元数据，消费者可以通过任意一台去连接到存放着数据的queue中，但这个导致节点间的通讯的频繁，如果存放数据的queue节点挂掉还有可能导致数据丢失，不是真正意义的高可用，只是能提高吞吐量.
+
+2.rabbitMQ镜像集群模式：当有消息进来时每个节点之间都会相互同步数据，无论consumer从哪个节点之间消费都能拿到数据，实现了高可用。但是他不是分布式的，如果这个queue数据量很大，大到这个节点机器装不下怎么办？怎么开启镜像集群模式的？在控制管理后台新增一个策略这个策略是镜像集群模式的策略，指定的时候可以要求数据同步到所有的节点也可以要求同步到指定的数量的节点，然后再次创建queue时使用这个策略即可
 
 rabbitMQ场景：一个 queue，多个 consumer。比如，生产者向 RabbitMQ 里发送了三条数据，顺序依次是 data1/data2/data3，压入的是 RabbitMQ 的一个内存队列。有三个消费者分别从 MQ 中消费这三条数据中的一条，结果消费者2先执行完操作，把 data2 存入数据库，然后是 data1/data3。这不明显乱了。
 
@@ -2058,9 +2082,9 @@ GROUP BY
 
 （2）能用 #{} 的地方就用 #{}，不用或少用 ${}  
 
-（3）表名作参数时，必须用 ${}。如：select * from ${tableName}  
+（3）表名作参数时，必须用${} 
 
-（4）order by 时，必须用 ${}。如：select * from t_user order by ${columnName}  
+（4）order by 时，必须用 ${}
 
 （5）使用 ${} 时，要注意何时加或不加单引号，即 ${} 和 '${}'
 
@@ -3130,7 +3154,7 @@ redis和memcache的区别：
 
 3.如果上面两种情况还不行，上大招。准备一个第三方介质,来做消费记录。以redis为例，给消息分配一个全局id，只要消费过该消息，将<id,message>以K-V形式写入redis。那消费者开始消费前，先去redis中查询有没消费记录即可。
 
-项目中常用到的设计模式：1,单例模式 2.工厂模式（sqlsessionfactory，LoggerFactory）  3.模板模式（在构造base类的时候用到）4.代理模式（aop实现记录日志）
+项目中常用到的设计模式：1,单例模式 2.工厂模式（sqlsessionfactory，LoggerFactory）**我在项目中用到**  **3.模板模式（在构造base类的时候用到）4.代理模式（aop实现记录日志）**
 
 Dubbo相关？
 
@@ -3152,7 +3176,21 @@ Dubbo相关？
 
  Eureka：AP架构设计(高可用、分区容错性)，Zookeeper：CP架构设计（强一致性、分区容错性） 
 
-<img src="assert/42.png" style="zoom:80%;" />![](/assert/43.png)
+q1:eureka宕机后服务间还能正常访问吗？
+
+是可以的。原因：在启动消费者和提供者的时候，eureka注册中心是正常运行的，因此可以将各个消费者和提供者可以正常订阅。当eureka突然宕机的时候，各个提供者和消费者都已经保存有相互间的服务名称与ip映射，所以相互访问没有问。
+
+q2:在eureka宕机的情况下，消费者或者提供者服务重启后，消费者是否可以继续访问提供者?
+
+​	在eureka宕机未启动的情况下，当消费者重新启动后，无法从eureka中拉取其他服务的映射信息，因此消费者是无法再访问提供者的。不过，当提供者重新启动后，由于消费者还继续保存着与提供者之间的映射信息，而且提供者的信息并未发生改变，因此消费者还是可以继续访问提供者的。
+
+q3:在eureka宕机的情况下，服务之间在何种情况下无法继续进行相互访问？
+
+所有服务全部停止，再重新启动除eureka之外的服务； 修改消费者或提供者IP，端口，服务名称等映射信息的情况下。
+
+<img src="assert/42.png" style="zoom:80%;" />
+
+![](/assert/43.png)
 
 <img src="assert/43.png" style="zoom:80%;" />
 
@@ -3173,6 +3211,10 @@ JWT相关？
 <img src="/assert/48.png" style="zoom:90%;" />
 
 ![](/assert/49.png)
+
+接口调用过程：
+
+![](/assert/63.png)
 
 ES相关
 
@@ -3485,7 +3527,7 @@ HystrixBadRequestException异常将不会触发熔断。
 
 3.怎么保证（当我更新数据时）redis缓存和数据库的双写一致性？
 
-（1）我是先更新数据库，在删除缓存，但是又一些问题，如当你更新万数据库后还没来得及删除缓存导致瞬间读取的数据不一致。 
+（1）我是先更新数据库，在删除缓存，但是又一些问题，如当你更新完数据库后还没来得及删除缓存导致瞬间读取的数据不一致。 
 
 redis除了放缓存还做过什么？还做过存放登录信息，过期失效，分布式锁，redis中的list还可以做队列，如保存一致性，消除峰值；还可以做订阅
 
@@ -3493,7 +3535,7 @@ redis除了放缓存还做过什么？还做过存放登录信息，过期失效
 
 分布式锁原理：就是我多个线程去访问同一个数据，如数据库中的数据，如多个人买商品，他们查的时候是有的，但是买的时候不够了这种情况，多个人去访问的时候，都会在zookeeper上创建临时节点，谁先创建节点谁获得执行权，其他等待，当操作完之后zookeeper会自动删除临时节点 
 
-（3）redis实现缓存和其他方式实现（如map是当前节点有效）缓存有什么区别？
+（3）redis(中央缓存)实现缓存和其他方式实现（如map是当前节点有效）缓存有什么区别？
 
 4.数据库的优化？
 
@@ -3510,9 +3552,206 @@ redis除了放缓存还做过什么？还做过存放登录信息，过期失效
 
 （4）索引底层了解吗？
 
-（5）mybatis的执行器？springmvc中传递过来的参数在哪处理？线程常用的方法？notif和notifyall区别？
+（5）mybatis的执行器？（SIMPLE: 默认的执行器, 对每条sql进行预编译->设置参数->执行等操作；BATCH: 批量执行器, 对相同sql进行一次预编译, 然后设置参数, 最后统一执行操作；REUSE: REUSE 执行器会重用预处理语句（prepared statements）springmvc中传递过来的参数在哪处理？线程常用的方法？notif和notifyall区别？
 
  （6）我的周限项目高并发就是会可能大量同一时间回传数据，导致拥堵阻塞，解决就是采用读写分离，分库分表，每2百万数据分一张表，按id分。使用hash算法，根据根据标识算出哪张表
 
-（7）线程池？类加载的过程？cookie和session可以存对象吗？aop怎么实现全局异常处理？springboot自动配置原理？复合索引最左原则，就是第一个字段一定要有效放在最左边，否则就失效了，还有两个字段建立的复合索引，两个字段中间是用的or连接，也会导致索引失败
+（7）线程池？类加载的过程？cookie和session可以存对象吗？（session可以保存对象，cookie只存储string类型的信息）aop怎么实现全局异常处理？springboot自动配置原理？复合索引最左原则，就是第一个字段一定要有效放在最左边，否则就失效了，还有两个字段建立的复合索引，两个字段中间是用的or连接，也会导致索引失败
+
+类加载过程：
+
+![](/assert/62.png)
+
+aop实现全局异常处理：
+
+```java
+<dependency>  
+             <groupId>org.springframework.boot</groupId>
+           <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+         <dependency>
+            <groupId>cglib</groupId>
+             <artifactId>cglib</artifactId>
+             <version>2.2.2</version>
+         </dependency>
+
+在application.properties中添加配置
+#aop
+ spring.aop.proxy-target-class=true
+  
+  具体代码
+  @Aspect
+ @Component
+ public class GlobalAspect {
+      
+     @Pointcut("execution(public * cn.creditcrest.finance..*.*(..))")  
+     public void pcMethod(){};  
+     
+     @AfterThrowing(pointcut = "pcMethod()",throwing="e")  
+     public void doException(JoinPoint jp,Throwable e){  
+         if(e!=null){  
+             Logger logger = LoggerFactory.getLogger(jp.getSignature().getClass());
+              logger.error(e.getMessage(),e);
+         }  
+     }
+ 
+ }
+```
+
+**97.@Transactional(rollbackFor = Exception.class)**
+
+加了该注解，类里面的方法抛出异常就会回滚，数据库里的数据也会回滚，如果不配置该注解，那么事务只会遇到RuntimeException的时候才会回滚,加上rollbackFor=Exception.class,可以让事物在遇到非运行时异常时也回滚。
+
+异常分为运行时异常和非运行时异常，运行时异常包括（nullpointException，NUmformatException）非运行异常包括（IOException，sqlException）
+
+**98.solr和ES区别？**
+
+ES:
+
+- 分布式实时文件存储，并将每一个字段都编入索引，使其可以被搜索。
+- 实时分析的分布式搜索引擎。
+- 可以扩展到上百台服务器，处理PB级别的结构化或非结构化数据。
+
+Solr：
+
+1. Solr有一个更大、更成熟的用户、开发和贡献者社区。
+2. 支持添加多种格式的索引，如：HTML、PDF、微软 Office 系列软件格式以及 JSON、XML、CSV 等纯文本格式。
+3. Solr比较成熟、稳定。
+4. 不考虑建索引的同时进行搜索，速度更快。
+
+solr和ES的比较：
+
+当单纯的对已有数据进行搜索时，Solr更快，支持更多格式的数据，Elasticsearch 仅支持json文件格式。
+
+当实时建立索引时, Solr会产生io阻塞，查询性能较差, Elasticsearch具有明显的优势。
+
+随着数据量的增加，Solr的搜索效率会变得更低，而Elasticsearch却没有明显的变化。
+
+**99.nginx相关？**
+
+正向代理：我要访问谷歌，大陆没法访问，必须在自己客户端配置一个代理服务器，让他去代替我访问谷歌。客户端知道代理服务器端的存在。
+
+![](/assert/54.png)
+
+反向代理：客户端不知道代理服务器的存在，在代理服务器中配置，由代理服务器转发到真实的服务器，代理服务器和真是服务好像一个整体。暴露的是代理服务器的地址，隐藏了真是服务器的地址
+
+![](/assert/55.png)
+
+负载均衡：单个服务器解决不了，我们增加服务器的数量，然后将请求分发到不同的服务器上，有原先请求集中在单个服务器的情况改为请求分发到多个服务器上。
+
+动静分离：为了加快网站的解析速度，可以把动态页面和静态页面有不同的服务器来解析，加快解析速度，降低原来单个服务器的压力	
+
+![](/assert/56.png)
+
+nginx.conf配置文件主要分为三块：
+
+第一部分：全局块 ;从配置文件到events快之间的内容，主要会设置一些影响nginx的整体运行的指令，如：work_process    1;影响并发数的配置，值越大可支持并发数越高 。
+
+第二部分：events块;主要影响nginx服务器与用户的网络连接如：work_connections     1024;nginx支持的最大连接数
+
+第三部分：http块：包含http全局块，server块
+
+nginx中正则表达式：
+
+![](/assert/57.png)
+
+负载均衡配置：
+![](/assert/58.png)
+
+nginx负载均衡的集中策略：
+
+（1）轮询（默认）每个请求按时间顺序逐一分配到不同的服务器，若服务器dowm则自动剔除
+
+（2）weight 权重，默认为1，权重越高，被分配的客户端越多
+
+![](/assert/59.png)
+
+(3) ip_hash,每个请求按访问的hash结果分配，这样每个访客固定访问一个后端服务器，可以解决session共享的问题
+
+![](/assert/60.png)
+
+（4）fair方式第三方按后端服务器的响应时间来分配请求，相应时间短的优先分配
+
+![](/assert/61.png)
+
+动静分离：通过部署单独的静态资源达到动静分离的目的。
+
+**100.项目相关**
+
+1.在使用@requestbody提交参数时必须使用post提交
+
+2.在使用nginx做代理转发时后端已经解决了跨域问题，但还是一直报跨域错误，原因就是在nginx配置好转发后台端口没有彻底重启nginx，把服务下的nginx要关了。
+
+3.忘加泛型启动报错List<?> not declare?
+
+**101.Java中的四种引用？**
+
+1.强引用：如果一个对象有强引用，他不会被垃圾回收器回收，jvm也不会回收，而是抛出 OutOfMemoryError 错误，使程序异常终止。如果想中断强引用和某个对象之间的关联，可以显式地将引用赋值为null，这样一来的话，JVM在合适的时间就会回收该对象。
+
+```java
+String a="hello" //强引用
+a=null;			//取消强引用
+```
+
+2，软引用：如果一个对象有软引用，当内存足够时不会被回收，当内存不够时才会被垃圾收集器回收，适合做缓存处理。
+
+```java
+SoftReference<String> softName = new  SoftReference<>("张三");
+```
+
+3，弱引用：如果一个对象具有弱引用，那么当JVM进行垃圾回收时一旦发现弱引用对象就会进行垃圾回收操作，无论当前空间是否充足，但是由于垃圾回收是一个优先级较低的线程，所以并不一定能迅速发现弱引用对象。
+
+```java
+WeakReference<String> weakName = new WeakReference<String>("hello");
+```
+
+ThreadLocal就是使用了弱引用对象。当两个线程中一个在ThreadLocal中一个set值，一个取值，取值的线程是取不到的，因为ThreadLocal 只针对当前线程操作，其他线程对别的ThreadLocal内的内容不可见，ThreadLocal是一个Map，key存放的是当前线程实例对象，值存放的是要set进的值。
+
+4，虚引用：如果一个对象仅持有虚引用，那么它相当于没有引用，在任何时候都可能被垃圾回收器回收，虚引用必须和引用队列关联使用，当垃圾回收器准备回收一个对象时，如果发现它还有虚引用，就会把这个虚引用加入到与之关联的引用队列中。程序可以通过判断引用队列中是否已经加入了虚引用，来了解被引用的对象是否将要被垃圾回收。如果程序发现某个虚引用已经被加入到引用队列，那么就可以在所引用的对象的内存被回收之前采取必要的行动。
+
+```java
+ReferenceQueue<String> queue = new ReferenceQueue<String>();
+PhantomReference<String> pr = new PhantomReference<String>(new String("hello"), queue);
+```
+
+**102.锁相关？**
+
+1.锁分为重量级锁（cpu忙不过来需要操作系统的调度,把任务扔到队列中去）和轻量级锁（自旋锁）
+
+JUC包：并发包相关。
+
+```java
+1.AtomicInteger m=new AtomicInteger(0)	//轻量级锁 无锁，自旋锁（不需要操作系统调度）
+  m.incrementAndGet() 	//m++ CAS自旋锁的实现方式 比较并交换
+2.CAS面临的问题：ABA问题。初始0，被别的线程改为8，又被改为0，解决方法：加版本号
+3.CAS修改值得时候得原子性问题：在底层使用汇编语言指令：lock cmpxchg指令，多核时加lock单核时cmpxchg来保证原子性。lock意思是锁总线
+锁升级初步：
+1.偏向锁:不是锁比轻量级还轻，不用抢，只要把名字id号往上一贴就得到了，只要有人过来，就会进行锁升级，使用CAS自旋得方式进行抢锁
+```
+
+![](/assert/64.png)
+
+​											锁升级过程
+
+轻量级锁升成重量级锁靠判断来实现，如果一定次数后还没轮到自己拿到锁，就会升成重量级锁进队列。
+
+2.缓存行相关
+
+![](/assert/65.png)
+
+**103.JVM垃圾相关？**
+
+1.垃圾回收算法：
+
+![](/assert/66.png)
+
+**104.redis相关**
+
+1.五大VALUE使用场景？
+
+1.1 String (字符串（指令），数值计算（INCR原子操作限流，秒杀，值变化），二进制（bitmap）)
+
+1.2 List
+
+1.3 hash
 
